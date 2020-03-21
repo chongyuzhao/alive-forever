@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Android Input子系统专题-输入路由 | Alive</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="Android Input输入路由 ​ 路由在我们生活中基本都有接触，而我们这里说的输入路由主要是用在多屏幕多触摸输入设备中，设计者可以为对应的屏幕指定对应的输入设备，而这功能就是所谓的输入路由。  ​ 从InputFlinger的学习中我们知道，在InputFlinger中没有屏幕(Screen)的概念，而我们的输入事件是通过查找对应的Viewport(视口)来发送到对应的窗口，而窗口在指定的屏">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android Input子系统专题-输入路由">
+<meta property="og:url" content="https://chongyuzhao.github.io/2020/03/20/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-%E8%BE%93%E5%85%A5%E8%B7%AF%E7%94%B1/index.html">
+<meta property="og:site_name" content="Alive">
+<meta property="og:description" content="Android Input输入路由 ​ 路由在我们生活中基本都有接触，而我们这里说的输入路由主要是用在多屏幕多触摸输入设备中，设计者可以为对应的屏幕指定对应的输入设备，而这功能就是所谓的输入路由。  ​ 从InputFlinger的学习中我们知道，在InputFlinger中没有屏幕(Screen)的概念，而我们的输入事件是通过查找对应的Viewport(视口)来发送到对应的窗口，而窗口在指定的屏">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-03-20T13:19:34.000Z">
+<meta property="article:modified_time" content="2020-03-21T11:51:11.110Z">
+<meta property="article:author" content="chongyuzhao">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="Input">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternative" href="/atom.xml" title="Alive" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/chongyuzhao.github.io/img/favicon.jpg">
+  
+  
+      
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  
+  
+<link rel="stylesheet" href="/chongyuzhao.github.io/css/style.css">
+
+  <link rel="stylesheet" href="/chongyuzhao.github.io/font-awesome/css/font-awesome.min.css">
+  <link rel="apple-touch-icon" href="/chongyuzhao.github.io/apple-touch-icon.png">
+  
+  
+      <link rel="stylesheet" href="/chongyuzhao.github.io/fancybox/jquery.fancybox.css">
+  
+  <!-- 加载特效 -->
+    <script src="/chongyuzhao.github.io/js/pace.js"></script>
+    <link href="/chongyuzhao.github.io/css/pace/pace-theme-flash.css" rel="stylesheet" />
+  <script>
+      var yiliaConfig = {
+          rootUrl: '/chongyuzhao.github.io/',
+          fancybox: true,
+          animate: true,
+          isHome: false,
+          isPost: true,
+          isArchive: false,
+          isTag: false,
+          isCategory: false,
+          open_in_new: false
+      }
+  </script>
+<meta name="generator" content="Hexo 4.2.0"></head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/chongyuzhao.github.io/" class="profilepic">
+            
+            <img lazy-src="/chongyuzhao.github.io/img/head.jpg" class="js-avatar">
+            
+        </a>
+
+        <hgroup>
+          <h1 class="header-author"><a href="/chongyuzhao.github.io/" title="Hi Mate">chongyuzhao</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">just forever</p>
+        
+        
+            <form>
+                <input type="text" class="st-default-search-input search" id="search" placeholder=" Search...">
+            </form>
+        
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/chongyuzhao.github.io/Home">博客首页</a></li>
+                        
+                            <li><a href="/chongyuzhao.github.io/works">作品展示</a></li>
+                        
+                            <li><a href="/chongyuzhao.github.io/about">留言打卡</a></li>
+                        
+                            <li><a href="/chongyuzhao.github.io/FrontEndGuide">前端导航</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fl mail" target="_blank" href="/chongyuzhao.github.io/chongyu_Zhao@163.com" title="mail">mail</a>
+                            
+                                <a class="fl github" target="_blank" href="https://github.com/chongyuzhao" title="github">github</a>
+                            
+                                <a class="fl zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
+                            
+                                <a class="fl weibo" target="_blank" href="#" title="weibo">weibo</a>
+                            
+                                <a class="fl google" target="_blank" href="#" title="google">google</a>
+                            
+                                <a class="fl twitter" target="_blank" href="#" title="twitter">twitter</a>
+                            
+                                <a class="fl linkedin" target="_blank" href="#" title="linkedin">linkedin</a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <a href="/chongyuzhao.github.io/tags/Android/" style="font-size: 20px;">Android</a> <a href="/chongyuzhao.github.io/tags/Input/" style="font-size: 15px;">Input</a> <a href="/chongyuzhao.github.io/tags/input/" style="font-size: 10px;">input</a>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a target="_blank" class="main-nav-link switch-friends-link" href="http://chongyuzhao.github.io/">name</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/chongyuzhao.github.io/" title="Me">chongyuzhao</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/chongyuzhao.github.io/" class="profilepic">
+                
+                    <img lazy-src="/chongyuzhao.github.io/img/head.jpg" class="js-avatar">
+                
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/chongyuzhao.github.io/" title="Me">chongyuzhao</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">just forever</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/chongyuzhao.github.io/Home">博客首页</a></li>
+                
+                    <li><a href="/chongyuzhao.github.io/works">作品展示</a></li>
+                
+                    <li><a href="/chongyuzhao.github.io/about">留言打卡</a></li>
+                
+                    <li><a href="/chongyuzhao.github.io/FrontEndGuide">前端导航</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a class="mail" target="_blank" href="/chongyuzhao.github.io/chongyu_Zhao@163.com" title="mail">mail</a>
+                    
+                        <a class="github" target="_blank" href="https://github.com/chongyuzhao" title="github">github</a>
+                    
+                        <a class="zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
+                    
+                        <a class="weibo" target="_blank" href="#" title="weibo">weibo</a>
+                    
+                        <a class="google" target="_blank" href="#" title="google">google</a>
+                    
+                        <a class="twitter" target="_blank" href="#" title="twitter">twitter</a>
+                    
+                        <a class="linkedin" target="_blank" href="#" title="linkedin">linkedin</a>
+                    
+                </div>
+            </nav>
+        </header>                
+    </div>
+</nav>
+      <div class="body-wrap"><article id="post-Android-Input子系统专题-输入路由" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/chongyuzhao.github.io/2020/03/20/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-%E8%BE%93%E5%85%A5%E8%B7%AF%E7%94%B1/" class="article-date">
+      <time datetime="2020-03-20T13:19:34.000Z" itemprop="datePublished">2020-03-20</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Android Input子系统专题-输入路由
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/chongyuzhao.github.io/tags/Android/" rel="tag">Android</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/chongyuzhao.github.io/tags/Input/" rel="tag">Input</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <h1 id="Android-Input输入路由"><a href="#Android-Input输入路由" class="headerlink" title="Android Input输入路由"></a>Android Input输入路由</h1><p>​    路由在我们生活中基本都有接触，而我们这里说的输入路由主要是用在多屏幕多触摸输入设备中，设计者可以为对应的屏幕指定对应的输入设备，而这功能就是所谓的输入路由。</p>
+<p>​    从InputFlinger的学习中我们知道，在InputFlinger中没有屏幕(Screen)的概念，而我们的输入事件是通过查找对应的Viewport(视口)来发送到对应的窗口，而窗口在指定的屏幕上，也即是对应的输入事件发送到指定的屏幕中。在底层我们是不知道哪个触摸设备对应哪个屏幕的，例如当有两个HDMI设备时，那么我们哪个触摸设备对应哪个显示器呢，这是很不好去判断的，一般查找Viewport有以下4种情况：</p>
+<p>​    1.如果有在设备路由表中定义，则根据路由表的display id进行查找，且不论是否找到，都会直接返回(找不到对应的Viewport则返回NULL)。</p>
+<p>​    2.如果idc配置文件中有定义touch.displayId字段，则根据该字段进行匹配查找，且不论是否找到，都会直接返回(找不到对应的Viewport则返回NULL)。</p>
+<p>​    3.根据设备类型进行查找，如果设备属于内置类型输入设备，则会匹配到内置的display，而如果属于外置输入设备，如usb触摸屏等，则会去匹配外置的display。</p>
+<p>​    4.在第3点的以外情况，即如果是外置输入设备，但没有匹配到外置的display，则会匹配默认的内置display。</p>
+<a id="more"></a>
+
+<p>​    以上4种情况可直接参考<code>TouchInputMapper::findViewport</code>的具体实现。</p>
+<p>​    输入路由就是针对第一种情况。具体的源码如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">3458</span> <span class="function"><span class="built_in">std</span>::optional&lt;DisplayViewport&gt; <span class="title">TouchInputMapper::findViewport</span><span class="params">()</span> </span>&#123;</span><br><span class="line"><span class="number">3459</span>     <span class="keyword">if</span> (mParameters.hasAssociatedDisplay) &#123;</span><br><span class="line"><span class="number">3460</span>         <span class="keyword">const</span> <span class="built_in">std</span>::optional&lt;<span class="keyword">uint8_t</span>&gt; displayPort = mDevice-&gt;getAssociatedDisplayPort();</span><br><span class="line"><span class="number">3461</span>         <span class="keyword">if</span> (displayPort) &#123;</span><br><span class="line"><span class="number">3462</span>             <span class="comment">// Find the viewport that contains the same port</span></span><br><span class="line"><span class="number">3463</span>             <span class="built_in">std</span>::optional&lt;DisplayViewport&gt; v = mConfig.getDisplayViewportByPort(*displayPort);</span><br><span class="line"><span class="number">3464</span>             <span class="keyword">if</span> (!v) &#123;</span><br><span class="line"><span class="number">3465</span>                 ALOGW(<span class="string">"Input device %s should be associated with display on port %"</span> PRIu8 <span class="string">", "</span></span><br><span class="line"><span class="number">3466</span>                         <span class="string">"but the corresponding viewport is not found."</span>,</span><br><span class="line"><span class="number">3467</span>                         getDeviceName().c_str(), *displayPort);</span><br><span class="line"><span class="number">3468</span>             &#125;</span><br><span class="line"><span class="number">3469</span>             <span class="keyword">return</span> v;</span><br><span class="line"><span class="number">3470</span>         &#125;</span><br><span class="line">		……</span><br><span class="line"><span class="number">3501</span> &#125;</span><br><span class="line">    </span><br><span class="line"> <span class="number">262</span>     <span class="function"><span class="keyword">inline</span> <span class="built_in">std</span>::optional&lt;<span class="keyword">uint8_t</span>&gt; <span class="title">getAssociatedDisplayPort</span><span class="params">()</span> <span class="keyword">const</span> </span>&#123;</span><br><span class="line"> <span class="number">263</span>         <span class="keyword">return</span> mAssociatedDisplayPort;</span><br><span class="line"> <span class="number">264</span>     &#125;</span><br><span class="line">    </span><br><span class="line"><span class="number">1067</span> <span class="function"><span class="keyword">void</span> <span class="title">InputDevice::configure</span><span class="params">(<span class="keyword">nsecs_t</span> when, <span class="keyword">const</span> InputReaderConfiguration* <span class="built_in">config</span>, <span class="keyword">uint32_t</span> changes)</span> </span>&#123;</span><br><span class="line"><span class="number">1068</span>     mSources = <span class="number">0</span>;</span><br><span class="line"><span class="number">1069</span></span><br><span class="line">		……</span><br><span class="line"><span class="number">1100</span></span><br><span class="line"><span class="number">1101</span>         <span class="keyword">if</span> (!changes || (changes &amp; InputReaderConfiguration::CHANGE_DISPLAY_INFO)) &#123;</span><br><span class="line"><span class="number">1102</span>              <span class="comment">// In most situations, no port will be specified.</span></span><br><span class="line"><span class="number">1103</span>             mAssociatedDisplayPort = <span class="built_in">std</span>::nullopt;</span><br><span class="line"><span class="number">1104</span>             <span class="comment">// Find the display port that corresponds to the current input port.</span></span><br><span class="line"><span class="number">1105</span>             <span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span>&amp; inputPort = mIdentifier.location;</span><br><span class="line"><span class="number">1106</span>             <span class="keyword">if</span> (!inputPort.empty()) &#123;</span><br><span class="line"><span class="number">1107</span>                 <span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">unordered_map</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>, <span class="keyword">uint8_t</span>&gt;&amp; ports = <span class="built_in">config</span>-&gt;portAssociations;</span><br><span class="line"><span class="number">1108</span>                 <span class="keyword">const</span> <span class="keyword">auto</span>&amp; displayPort = ports.<span class="built_in">find</span>(inputPort);</span><br><span class="line"><span class="number">1109</span>                 <span class="keyword">if</span> (displayPort != ports.<span class="built_in">end</span>()) &#123;</span><br><span class="line"><span class="number">1110</span>                     mAssociatedDisplayPort = <span class="built_in">std</span>::make_optional(displayPort-&gt;second);</span><br><span class="line"><span class="number">1111</span>                 &#125;</span><br><span class="line"><span class="number">1112</span>             &#125;</span><br><span class="line"><span class="number">1113</span>         &#125;</span><br><span class="line"><span class="number">1114</span></span><br><span class="line">		……</span><br><span class="line"><span class="number">1120</span> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>​    从上述的代码可以看到，输入路由就是通过InputDevice的location来从portAssociations表中去查找display。portAssociations的值我们可以逆推找到，也可以从官网的介绍文档中得知 – <code>/vendor/etc/input-port-associations.xml</code>，值的获取如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1905</span>     <span class="keyword">private</span> <span class="keyword">static</span> String[] getInputPortAssociations() &#123;</span><br><span class="line"><span class="number">1906</span>         File baseDir = Environment.getVendorDirectory();</span><br><span class="line"><span class="number">1907</span>         File confFile = <span class="keyword">new</span> File(baseDir, PORT_ASSOCIATIONS_PATH);</span><br><span class="line"><span class="number">1908</span></span><br><span class="line"><span class="number">1909</span>         <span class="keyword">try</span> &#123;</span><br><span class="line"><span class="number">1910</span>             InputStream stream = <span class="keyword">new</span> FileInputStream(confFile);</span><br><span class="line"><span class="number">1911</span>             List&lt;Pair&lt;String, String&gt;&gt; associations =</span><br><span class="line"><span class="number">1912</span>                     ConfigurationProcessor.processInputPortAssociations(stream);</span><br><span class="line"><span class="number">1913</span>             List&lt;String&gt; associationList = flatten(associations);</span><br><span class="line"><span class="number">1914</span>             <span class="keyword">return</span> associationList.toArray(<span class="keyword">new</span> String[<span class="number">0</span>]);</span><br><span class="line"><span class="number">1915</span>         &#125; <span class="keyword">catch</span> (FileNotFoundException e) &#123;</span><br><span class="line"><span class="number">1916</span>             <span class="comment">// Most of the time, file will not exist, which is expected.</span></span><br><span class="line"><span class="number">1917</span>         &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line"><span class="number">1918</span>             Slog.e(TAG, <span class="string">"Could not parse '"</span> + confFile.getAbsolutePath() + <span class="string">"'"</span>, e);</span><br><span class="line"><span class="number">1919</span>         &#125;</span><br><span class="line"><span class="number">1920</span>         <span class="keyword">return</span> <span class="keyword">new</span> String[<span class="number">0</span>];</span><br><span class="line"><span class="number">1921</span>     &#125;</span><br><span class="line"> <span class="number">88</span>     <span class="meta">@VisibleForTesting</span></span><br><span class="line"> <span class="number">89</span>     <span class="keyword">static</span> List&lt;Pair&lt;String, String&gt;&gt; processInputPortAssociations(InputStream xml)</span><br><span class="line"> <span class="number">90</span>             <span class="keyword">throws</span> Exception &#123;</span><br><span class="line"> <span class="number">91</span>         List&lt;Pair&lt;String, String&gt;&gt; associations = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"> <span class="number">92</span>         <span class="keyword">try</span> (InputStreamReader confReader = <span class="keyword">new</span> InputStreamReader(xml)) &#123;</span><br><span class="line"> <span class="number">93</span>             XmlPullParser parser = Xml.newPullParser();</span><br><span class="line"> <span class="number">94</span>             parser.setInput(confReader);</span><br><span class="line"> <span class="number">95</span>             XmlUtils.beginDocument(parser, <span class="string">"ports"</span>);</span><br><span class="line"> <span class="number">96</span></span><br><span class="line"> <span class="number">97</span>             <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line"> <span class="number">98</span>                 XmlUtils.nextElement(parser);</span><br><span class="line"> <span class="number">99</span>                 String entryName = parser.getName();</span><br><span class="line"><span class="number">100</span>                 <span class="keyword">if</span> (!<span class="string">"port"</span>.equals(entryName)) &#123;</span><br><span class="line"><span class="number">101</span>                     <span class="keyword">break</span>;</span><br><span class="line"><span class="number">102</span>                 &#125;</span><br><span class="line"><span class="number">103</span>                 String inputPort = parser.getAttributeValue(<span class="keyword">null</span>, <span class="string">"input"</span>);</span><br><span class="line"><span class="number">104</span>                 String displayPort = parser.getAttributeValue(<span class="keyword">null</span>, <span class="string">"display"</span>);</span><br><span class="line"><span class="number">105</span>                 <span class="keyword">if</span> (TextUtils.isEmpty(inputPort) || TextUtils.isEmpty(displayPort)) &#123;</span><br><span class="line"><span class="number">106</span>                     <span class="comment">// This is likely an error by an OEM during device configuration</span></span><br><span class="line"><span class="number">107</span>                     Slog.wtf(TAG, <span class="string">"Ignoring incomplete entry"</span>);</span><br><span class="line"><span class="number">108</span>                     <span class="keyword">continue</span>;</span><br><span class="line"><span class="number">109</span>                 &#125;</span><br><span class="line"><span class="number">110</span>                 <span class="keyword">try</span> &#123;</span><br><span class="line"><span class="number">111</span>                     Integer.parseUnsignedInt(displayPort);</span><br><span class="line"><span class="number">112</span>                 &#125; <span class="keyword">catch</span> (NumberFormatException e) &#123;</span><br><span class="line"><span class="number">113</span>                     Slog.wtf(TAG, <span class="string">"Display port should be an integer"</span>);</span><br><span class="line"><span class="number">114</span>                     <span class="keyword">continue</span>;</span><br><span class="line"><span class="number">115</span>                 &#125;</span><br><span class="line"><span class="number">116</span>                 associations.add(<span class="keyword">new</span> Pair&lt;&gt;(inputPort, displayPort));</span><br><span class="line"><span class="number">117</span>             &#125;</span><br><span class="line"><span class="number">118</span>         &#125;</span><br><span class="line"><span class="number">119</span>         <span class="keyword">return</span> associations;</span><br><span class="line"><span class="number">120</span>     &#125;</span><br></pre></td></tr></table></figure>
+
+<p>​    从代码上看，输入路由的配置文件input-port-associations.xml的格式如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">ports</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">port</span> <span class="attr">display</span>=<span class="string">"0"</span> <span class="attr">input</span>=<span class="string">"usb-xhci-hcd.0.auto-1.1/input0"</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">port</span> <span class="attr">display</span>=<span class="string">"1"</span> <span class="attr">input</span>=<span class="string">"usb-xhci-hcd.0.auto-1.2/input0"</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">ports</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>​    顶层以<ports>为tag，子节点为一组display-input配置。display属性是一个整形值，对应了displayId，input属性是输入设备的描述。回顾<code>InputDevice::configure</code>方法的内容，input的字段对应了InputDevice的location字段。displayId我们很好理解，就是显示设备在Display系统中的idz中，我们可以通过<code>dumpsys display</code>来获取，而这个location值也可以通过<code>dumpsys input</code>来获取设备对应的值。</p>
+<p>​    我们再看以下location这个值是从哪里来的：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1189</span> <span class="function"><span class="keyword">status_t</span> <span class="title">EventHub::openDeviceLocked</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* devicePath)</span> </span>&#123;</span><br><span class="line">    	……</span><br><span class="line"><span class="number">1240</span>     <span class="comment">// Get device physical location.</span></span><br><span class="line"><span class="number">1241</span>     <span class="keyword">if</span>(ioctl(fd, EVIOCGPHYS(<span class="keyword">sizeof</span>(<span class="built_in">buffer</span>) - <span class="number">1</span>), &amp;<span class="built_in">buffer</span>) &lt; <span class="number">1</span>) &#123;</span><br><span class="line"><span class="number">1242</span>         <span class="comment">//fprintf(stderr, "could not get location for %s, %s\n", devicePath, strerror(errno));</span></span><br><span class="line"><span class="number">1243</span>     &#125; <span class="keyword">else</span> &#123;</span><br><span class="line"><span class="number">1244</span>         <span class="built_in">buffer</span>[<span class="keyword">sizeof</span>(<span class="built_in">buffer</span>) - <span class="number">1</span>] = <span class="string">'\0'</span>;</span><br><span class="line"><span class="number">1245</span>         identifier.location = <span class="built_in">buffer</span>;</span><br><span class="line"><span class="number">1246</span>     &#125;</span><br><span class="line">    	……</span><br><span class="line"><span class="number">1477</span> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>​    location就是input设备驱动中的phys。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>​    输入路由其实就是简单的由一个xml文件对输入设备(触摸设备)和显示设备之间进行绑定。我觉得可以由以下的用途：</p>
+<p>​    1.多个外置的输入设备和显示设备，需要指定对应的输入和显示设备关系，可以使用输入路由控制。</p>
+<p>​    2.一个内置一个外置的输入设备和显示设备。当两个显示器进行同显时(此时只有一个viewport)，那么两个输入设备都可以控制主显，而我们又不希望如此时，可以通过输入路由指定外置输入设备控制外置显示设备(即当只有异显时才生效)。</p>
+<p>​    3.将某个输入设备的display设成一个不存在的displayId，那么就可以禁止掉输入设备的事件(有点多此一举，因为可通过<code>excluded-input-devices.xml</code>让对应的设备不进行注册，但这种做法可以禁止掉一类型的输入设备事件上报，也不失为一种方式)。</p>
+<p>​    如果大家还有其他想到的用途，欢迎交流~</p>
+<p>，</p>
+
+      
+      
+        <div class="page-reward">
+          <p><a href="javascript:void(0)" onclick="dashangToggle()" class="dashang">赏</a></p>
+          <div class="hide_box"></div>
+          <div class="shang_box">
+            <a class="shang_close" href="javascript:void(0)" onclick="dashangToggle()">×</a>
+            <div class="shang_tit">
+              <p>纯属好玩</p>
+            </div>
+            <div class="shang_payimg">
+              <img src="/img/alipayimg.jpg" alt="扫码支持" title="扫一扫" />
+            </div>
+              <div class="pay_explain">扫码打赏，你说多少就多少</div>
+            <div class="shang_payselect">
+              
+                <div class="pay_item checked" data-id="alipay">
+                  <span class="radiobox"></span>
+                  <span class="pay_logo"><img src="/img/alipay.png" alt="支付宝" /></span>
+                </div>
+              
+              
+                <div class="pay_item" data-id="wechat">
+                  <span class="radiobox"></span>
+                  <span class="pay_logo"><img src="/img/weixin.png" alt="微信" /></span>
+                </div>
+              
+            </div>
+            <div class="shang_info">
+              <p>打开<span id="shang_pay_txt">支付宝</span>扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+        </div>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/zepto/1.2.0/zepto.min.js"></script>
+        <script type="text/javascript">
+          $(".pay_item").click(function(){
+            $(this).addClass('checked').siblings('.pay_item').removeClass('checked');
+            var dataid=$(this).attr('data-id');
+            $(".shang_payimg img").attr("src","/img/"+dataid+"img.jpg");
+            $("#shang_pay_txt").text(dataid=="alipay"?"支付宝":"微信");
+          });
+          function dashangToggle(){
+            
+            $(".hide_box").fadeToggle();
+            $(".shang_box").fadeToggle();
+          }
+        </script>
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/chongyuzhao.github.io/2020/03/20/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-%E8%BE%93%E5%85%A5%E8%B7%AF%E7%94%B1/">Android Input子系统专题-输入路由</a></p>
+        <p><span>文章作者:</span><a href="/chongyuzhao.github.io/" title="访问 chongyuzhao 的个人博客">chongyuzhao</a></p>
+        <p><span>发布时间:</span>2020年03月20日 - 21时19分</p>
+        <p><span>最后更新:</span>2020年03月21日 - 19时51分</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/chongyuzhao.github.io/2020/03/20/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-%E8%BE%93%E5%85%A5%E8%B7%AF%E7%94%B1/" title="Android Input子系统专题-输入路由">https://chongyuzhao.github.io/2020/03/20/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-%E8%BE%93%E5%85%A5%E8%B7%AF%E7%94%B1/</a>
+            <span class="copy-path" data-clipboard-text="原文: https://chongyuzhao.github.io/2020/03/20/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-%E8%BE%93%E5%85%A5%E8%B7%AF%E7%94%B1/　　作者: chongyuzhao" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script src="/chongyuzhao.github.io/js/clipboard.min.js"></script>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" title="中国大陆 (CC BY-NC-SA 3.0 CN)" target = "_blank">"署名-非商用-相同方式共享 3.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+<nav id="article-nav">
+  
+  
+    <a href="/chongyuzhao.github.io/2020/03/15/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Android Input子系统专题-InputFlinger(一)</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Android-Input输入路由"><span class="toc-number">1.</span> <span class="toc-text">Android Input输入路由</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">2.</span> <span class="toc-text">总结</span></a></li></ol>
+</div>
+<input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+
+<script src="https://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+
+<script>
+    var valueHide = "隐藏目录";
+    var valueShow = "显示目录";
+
+    if ($(".left-col").is(":hidden")) {
+        $("#tocButton").attr("value", valueShow);
+    }
+    $("#tocButton").click(function() {
+        if ($("#toc").is(":hidden")) {
+            $("#tocButton").attr("value", valueHide);
+            $("#toc").slideDown(320);
+        }
+        else {
+            $("#tocButton").attr("value", valueShow);
+            $("#toc").slideUp(350);
+        }
+    })
+    if ($(".toc").length < 1) {
+        $("#toc, #tocButton").hide();
+    }
+</script>
+
+
+
+
+
+<div class="bdsharebuttonbox">
+	<a href="#" class="fx fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+	<a href="#" class="fx fa-weixin bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+	<a href="#" class="fx fa-qq bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+	<a href="#" class="fx fa-facebook-official bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+	<a href="#" class="fx fa-twitter bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+	<a href="#" class="fx fa-linkedin bds_linkedin" data-cmd="linkedin" title="分享到linkedin"></a>
+	<a href="#" class="fx fa-files-o bds_copy" data-cmd="copy" title="分享到复制网址"></a>
+</div>
+<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"2","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/chongyuzhao.github.io/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+
+
+
+
+    
+        <div id="gitments"></div>
+<script src="/chongyuzhao.github.io/js/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+      id: window.location.pathname,
+      owner: 'zcy',
+      repo: 'chongyuzhao.github.io',
+      oauth: {
+        client_id: '',
+        client_secret: '',
+      },
+    })
+    gitment.render('gitments')
+</script>
+    
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/chongyuzhao.github.io/" title="回到主页"><i class="fa fa-home"></i></a>
+        
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+        
+            <a href="/chongyuzhao.github.io/2020/03/15/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger/" title="下一篇: Android Input子系统专题-InputFlinger(一)">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/chongyuzhao.github.io/2020/03/20/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-%E8%BE%93%E5%85%A5%E8%B7%AF%E7%94%B1/">Android Input子系统专题-输入路由</a></li><li class="post-list-item"><a class="post-list-link" href="/chongyuzhao.github.io/2020/03/15/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger/">Android Input子系统专题-InputFlinger(一)</a></li><li class="post-list-item"><a class="post-list-link" href="/chongyuzhao.github.io/2020/03/15/Android-input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-%E5%BC%80%E7%AF%87/">Android input子系统专题--开篇</a></li></ul>
+    <script src="https://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+    <script>
+        $(".post-list").addClass("toc-article");
+        $(".post-list-item a").attr("target","_blank");
+        $("#post-nav-button > a:nth-child(2)").click(function() {
+            $(".fa-bars, .fa-times").toggle();
+            $(".post-list").toggle(300);
+            if ($(".toc").length > 0) {
+                $("#toc, #tocButton").toggle(200, function() {
+                    if ($(".switch-area").is(":visible")) {
+                        $("#tocButton").attr("value", valueHide);
+                        }
+                    })
+            }
+            else {
+            }
+        })
+    </script>
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                &copy; 2020 chongyuzhao
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/luuman/hexo-theme-spfk" target="_blank">spfk</a> by luuman
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" >海贼到访数: 
+                            <span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>, </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit">本页阅读量: 
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+
+    </div>
+    
+<script src="https://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+
+
+<script src="/chongyuzhao.github.io/js/main.js"></script>
+
+
+    <script>
+        $(document).ready(function() {
+            var backgroundnum = 24;
+            var backgroundimg = "url(/chongyuzhao.github.io/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+            $("#mobile-nav").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+            $(".left-col").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+        })
+    </script>
+
+
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    $(document).ready(function() {
+        if ($("#comments").length < 1) {
+            $("#scroll > a:nth-child(2)").hide();
+        };
+    })
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+  <script language="javascript">
+    $(function() {
+        $("a[title]").each(function() {
+            var a = $(this);
+            var title = a.attr('title');
+            if (title == undefined || title == "") return;
+            a.data('title', title).removeAttr('title').hover(
+
+            function() {
+                var offset = a.offset();
+                $("<div id=\"anchortitlecontainer\"></div>").appendTo($("body")).html(title).css({
+                    top: offset.top - a.outerHeight() - 15,
+                    left: offset.left + a.outerWidth()/2 + 1
+                }).fadeIn(function() {
+                    var pop = $(this);
+                    setTimeout(function() {
+                        pop.remove();
+                    }, pop.text().length * 800);
+                });
+            }, function() {
+                $("#anchortitlecontainer").remove();
+            });
+        });
+    });
+</script>
+
+
+    <script type="text/javascript">
+      window.onload = function(){
+        document.getElementById("search").onclick = function(){
+            console.log("search")
+            search();
+        }
+      }
+      function search(){
+        (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+        (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+        e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+        })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+        _st('install','A1Pz-LKMXbrzcFg2FWi6','2.0.0');
+      }
+    </script>
+
+
+  <script src='https://unpkg.com/mermaid@7.1.2/dist/mermaid.min.js'></script>
+  <script>
+    if (window.mermaid) {
+      mermaid.initialize({theme: 'forest'});
+    }
+  </script>
+
+
+  </div>
+</body>
+</html>

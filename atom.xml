@@ -6,7 +6,7 @@
   <link href="/chongyuzhao.github.io/atom.xml" rel="self"/>
   
   <link href="https://chongyuzhao.github.io/"/>
-  <updated>2020-03-15T13:39:40.952Z</updated>
+  <updated>2020-03-21T11:51:11.110Z</updated>
   <id>https://chongyuzhao.github.io/</id>
   
   <author>
@@ -17,17 +17,52 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>Android Input子系统专题-InputFlinger</title>
-    <link href="https://chongyuzhao.github.io/2020/03/15/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger/"/>
-    <id>https://chongyuzhao.github.io/2020/03/15/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger/</id>
-    <published>2020-03-15T13:39:40.000Z</published>
-    <updated>2020-03-15T13:39:40.952Z</updated>
+    <title>Android Input子系统专题-输入路由</title>
+    <link href="https://chongyuzhao.github.io/2020/03/20/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-%E8%BE%93%E5%85%A5%E8%B7%AF%E7%94%B1/"/>
+    <id>https://chongyuzhao.github.io/2020/03/20/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-%E8%BE%93%E5%85%A5%E8%B7%AF%E7%94%B1/</id>
+    <published>2020-03-20T13:19:34.000Z</published>
+    <updated>2020-03-21T11:51:11.110Z</updated>
     
     <summary type="html">
+    
+      Android Input输入路由
+​ 路由在我们生活中基本都有接触，而我们这里说的输入路由主要是用在多屏幕多触摸输入设备中，设计者可以为对应的屏幕指定对应的输入设备，而这功能就是所谓的输入路由。
+
+​ 从InputFlinger的学习中我们知道，在InputFlinger中没有屏幕(Screen)的概念，而我们的输入事件是通过查找对应的Viewport(视口)来发送到对应的窗口，而窗口在指定的屏幕上，也即是对应的输入事件发送到指定的屏幕中。在底层我们是不知道哪个触摸设备对应哪个屏幕的，例如当有两个HDMI设备时，那么我们哪个触摸设备对应哪个显示器呢，这是很不好去判断的，一般查找Viewpor
     
     </summary>
     
     
+    
+      <category term="Android" scheme="https://chongyuzhao.github.io/tags/Android/"/>
+    
+      <category term="Input" scheme="https://chongyuzhao.github.io/tags/Input/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Android Input子系统专题-InputFlinger(一)</title>
+    <link href="https://chongyuzhao.github.io/2020/03/15/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger/"/>
+    <id>https://chongyuzhao.github.io/2020/03/15/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger/</id>
+    <published>2020-03-15T13:39:40.000Z</published>
+    <updated>2020-03-20T13:18:34.490Z</updated>
+    
+    <summary type="html">
+    
+      InputFlinger的启动
+​ InputFlinger在Android(至少在AndroiP及以后的版本)中作为一个服务而存在，如果有学习过Android的服务启动，那么对InputFlinger的启动也将会十分熟悉，在本文将简单地介绍一下它的启动。
+
+​ InputFlinger的源码在frameworks/native/services/inputflinger目录下，在该目录下有一个host目录，这里面就是InputFlinger的服务程序，而与host目录同级下的源码则是InputFlinger的核心代码–libinputflinger。
+
+​ 在host目录下有一个inputf
+    
+    </summary>
+    
+    
+    
+      <category term="Android" scheme="https://chongyuzhao.github.io/tags/Android/"/>
+    
+      <category term="Input" scheme="https://chongyuzhao.github.io/tags/Input/"/>
     
   </entry>
   
@@ -40,13 +75,10 @@
     
     <summary type="html">
     
-      
-      
-        
-        
-          &lt;h1 id=&quot;Android-Input的分层&quot;&gt;&lt;a href=&quot;#Android-Input的分层&quot; class=&quot;headerlink&quot; title=&quot;Android Input的分层&quot;&gt;&lt;/a&gt;Android Input的分层&lt;/h1&gt;&lt;p&gt;​   
-        
-      
+      Android Input的分层
+​ Android的input子系统大概是在2019年的3、4月份开始接触的，主要是因为负责Input部分的同事离职了，我就当仁不让地接上了这个话。Android是一个交互式的操作系统，显示与输入都是一个重要的组成部分。Android支持多种多样的输入设备，如触摸、游戏手柄、按键、鼠标、键盘等等。
+
+​ 基于Android与Linux的关系，Android的input子系统也是可分成三层：设备驱动层 - inputflinger层 - 应用处理层。设备驱动层与inputflinger层之间是通过Linux的设备驱动节点进行连接，inputflinger与应用层
     
     </summary>
     

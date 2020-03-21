@@ -19,7 +19,7 @@
     <link rel="alternative" href="/atom.xml" title="Alive" type="application/atom+xml">
   
   
-    <link rel="icon" href="/chongyuzhao.github.io/img/favicon.png">
+    <link rel="icon" href="/chongyuzhao.github.io/img/favicon.jpg">
   
   
       
@@ -75,6 +75,10 @@
         <p class="header-subtitle">just forever</p>
         
         
+            <form>
+                <input type="text" class="st-default-search-input search" id="search" placeholder=" Search...">
+            </form>
+        
         
             <div id="switch-btn" class="switch-btn">
                 <div class="icon">
@@ -93,11 +97,6 @@
                         </div>
                         
                         
-                        <div class="icon-wrap icon-me hide" data-idx="3">
-                            <div class="user"></div>
-                            <div class="shoulder"></div>
-                        </div>
-                        
                     </div>
                     
                 </div>
@@ -109,8 +108,6 @@
                         
                         <li>友情链接</li>
                         
-                        
-                        <li>关于我</li>
                         
                     </ul>
                 </div>
@@ -136,9 +133,9 @@
                     <nav class="header-nav">
                         <ul class="social">
                             
-                                <a class="fl mail" target="_blank" href="http://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&email=PAkNDgsKBQ4MCnxNTRJfU1E" title="mail">mail</a>
+                                <a class="fl mail" target="_blank" href="/chongyuzhao.github.io/chongyu_Zhao@163.com" title="mail">mail</a>
                             
-                                <a class="fl github" target="_blank" href="https://github.com/luuman" title="github">github</a>
+                                <a class="fl github" target="_blank" href="https://github.com/chongyuzhao" title="github">github</a>
                             
                                 <a class="fl zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
                             
@@ -157,7 +154,7 @@
                 
                 <section class="switch-part switch-part2">
                     <div class="widget tagcloud" id="js-tagcloud">
-                        <a href="/chongyuzhao.github.io/tags/Android/" style="font-size: 10px;">Android</a> <a href="/chongyuzhao.github.io/tags/input/" style="font-size: 10px;">input</a>
+                        <a href="/chongyuzhao.github.io/tags/Android/" style="font-size: 20px;">Android</a> <a href="/chongyuzhao.github.io/tags/Input/" style="font-size: 15px;">Input</a> <a href="/chongyuzhao.github.io/tags/input/" style="font-size: 10px;">input</a>
                     </div>
                 </section>
                 
@@ -166,18 +163,12 @@
                 <section class="switch-part switch-part3">
                     <div id="js-friends">
                     
-                      <a target="_blank" class="main-nav-link switch-friends-link" href="http://luuman.github.io/">name</a>
+                      <a target="_blank" class="main-nav-link switch-friends-link" href="http://chongyuzhao.github.io/">name</a>
                     
                     </div>
                 </section>
                 
 
-                
-                
-                <section class="switch-part switch-part4">
-                
-                    <div id="js-aboutme">纯海迷、爱运动、爱交友、爱旅行、喜欢接触新鲜事物、迎接新的挑战，更爱游离于错综复杂的编码与逻辑中</div>
-                </section>
                 
             </div>
         </div>
@@ -220,9 +211,9 @@
             <nav class="header-nav">
                 <div class="social">
                     
-                        <a class="mail" target="_blank" href="http://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&email=PAkNDgsKBQ4MCnxNTRJfU1E" title="mail">mail</a>
+                        <a class="mail" target="_blank" href="/chongyuzhao.github.io/chongyu_Zhao@163.com" title="mail">mail</a>
                     
-                        <a class="github" target="_blank" href="https://github.com/luuman" title="github">github</a>
+                        <a class="github" target="_blank" href="https://github.com/chongyuzhao" title="github">github</a>
                     
                         <a class="zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
                     
@@ -241,6 +232,72 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-Android-Input子系统专题-输入路由" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/chongyuzhao.github.io/2020/03/20/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-%E8%BE%93%E5%85%A5%E8%B7%AF%E7%94%B1/" class="article-date">
+      <time datetime="2020-03-20T13:19:34.000Z" itemprop="datePublished">2020-03-20</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/chongyuzhao.github.io/2020/03/20/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-%E8%BE%93%E5%85%A5%E8%B7%AF%E7%94%B1/">Android Input子系统专题-输入路由</a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+              Android Input输入路由
+​ 路由在我们生活中基本都有接触，而我们这里说的输入路由主要是用在多屏幕多触摸输入设备中，设计者可以为对应的屏幕指定对应的输入设备，而这功能就是所谓的输入路由。
+
+​ 从InputFlinger的学习中我们知道，在InputFlinger中没有屏幕(Screen)的概念，而我们的输入事件是通过查找对应的Viewport(视口)来发送到对应的窗口，而窗口在指定的屏幕上，也即是对应的输入事件发送到指定的屏幕中。在底层我们是不知道哪个触摸设备对应哪个屏幕的，例如当有两个HDMI设备时，那么我们哪个触摸设备对应哪个显示器呢，这是很不好去判断的，一般查找Viewpor
+          
+      
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+
+      
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/chongyuzhao.github.io/tags/Android/" rel="tag">Android</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/chongyuzhao.github.io/tags/Input/" rel="tag">Input</a></li></ul>
+    </div>
+
+      
+        <p class="article-more-link">
+          <a  href="/chongyuzhao.github.io/2020/03/20/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-%E8%BE%93%E5%85%A5%E8%B7%AF%E7%94%B1/#more">打开魔盒 >></a>
+        </p>
+      
+      <div class="clearfix"></div>
+    </div>
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+
+
+  
     <article id="post-Android-Input子系统专题-InputFlinger" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -258,7 +315,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/chongyuzhao.github.io/2020/03/15/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger/">Android Input子系统专题-InputFlinger</a>
+      <a class="article-title" href="/chongyuzhao.github.io/2020/03/15/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger/">Android Input子系统专题-InputFlinger(一)</a>
     </h1>
   
 
@@ -268,7 +325,13 @@
     <div class="article-entry" itemprop="articleBody">
       
           
-        
+              InputFlinger的启动
+​ InputFlinger在Android(至少在AndroiP及以后的版本)中作为一个服务而存在，如果有学习过Android的服务启动，那么对InputFlinger的启动也将会十分熟悉，在本文将简单地介绍一下它的启动。
+
+​ InputFlinger的源码在frameworks/native/services/inputflinger目录下，在该目录下有一个host目录，这里面就是InputFlinger的服务程序，而与host目录同级下的源码则是InputFlinger的核心代码–libinputflinger。
+
+​ 在host目录下有一个inputf
+          
       
       
     </div>
@@ -278,6 +341,14 @@
       
 
       
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/chongyuzhao.github.io/tags/Android/" rel="tag">Android</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/chongyuzhao.github.io/tags/Input/" rel="tag">Input</a></li></ul>
+    </div>
+
+      
+        <p class="article-more-link">
+          <a  href="/chongyuzhao.github.io/2020/03/15/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger/#more">打开魔盒 >></a>
+        </p>
       
       <div class="clearfix"></div>
     </div>
@@ -322,23 +393,11 @@
     <div class="article-entry" itemprop="articleBody">
       
           
-        <h1 id="Android-Input的分层"><a href="#Android-Input的分层" class="headerlink" title="Android Input的分层"></a>Android Input的分层</h1><p>​    Android的input子系统大概是在2019年的3、4月份开始接触的，主要是因为负责Input部分的同事离职了，我就当仁不让地接上了这个话。Android是一个交互式的操作系统，显示与输入都是一个重要的组成部分。Android支持多种多样的输入设备，如触摸、游戏手柄、按键、鼠标、键盘等等。</p>
-<p>​    基于Android与Linux的关系，Android的input子系统也是可分成三层：设备驱动层 - inputflinger层 - 应用处理层。设备驱动层与inputflinger层之间是通过Linux的设备驱动节点进行连接，inputflinger与应用层之前是通过InputChannel来进行连接。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">graph BT</span><br><span class="line">Driver[设备驱动] &#x3D;&#x3D; VFS &#x3D;&#x3D;&gt; InputFlinger[InputFlinger]</span><br><span class="line">InputFlinger[InputFlinger] &#x3D;&#x3D; InputChannel &#x3D;&#x3D;&gt; APP[应用]</span><br></pre></td></tr></table></figure>
+              Android Input的分层
+​ Android的input子系统大概是在2019年的3、4月份开始接触的，主要是因为负责Input部分的同事离职了，我就当仁不让地接上了这个话。Android是一个交互式的操作系统，显示与输入都是一个重要的组成部分。Android支持多种多样的输入设备，如触摸、游戏手柄、按键、鼠标、键盘等等。
 
-
-
-<p>​    设备驱动层决定了系统支持什么类型的设备，没有对应的驱动配置就成了巧妇难为无米之炊，如果没有触摸驱动，那么如何来触摸，USB没有配置好，那么USB鼠标键盘如何使用。设备驱动层是基础，后面在对这部分分析的时候，我们不针对具体的设备驱动，而是对input事件的从驱动层到用户节点的过程。</p>
-<p>​    inputflinger是Android的快递员，接收底层驱动投递的输入事件，然后经过封装分发给对应的客户。这一块也是目前接触最多的部分，后面将重点分析这一块。</p>
-<p>​    应用层则是Android真正处理事件的地方，输入事件的存在感就是由处理它的人体验的，这一部分很多时候已经被各种view给处理，剩余的则由应用去处理，平时我们所override的onKeyDown/onTouchEvent等等回调，就是我们研究的对象。</p>
-<h1 id="分析步骤"><a href="#分析步骤" class="headerlink" title="分析步骤"></a>分析步骤</h1><pre><code>1. InputFlinger的工作原理
-     1. 设备的配置文件
-     2. KeyEvent的处理过程
-     3. TouchEvent的处理过程
-2. InputChannel的创建
-3. InputFlinger分发事件到应用的过程
-4. Driver的事件上报过程。</code></pre><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>​    学无止境，每次重新看代码都会有不同的感悟，特别是Android版本的更新频繁，虽大体的框架不会变动太大，但也是有无穷的东西需要学习和总结。</p>
-
+​ 基于Android与Linux的关系，Android的input子系统也是可分成三层：设备驱动层 - inputflinger层 - 应用处理层。设备驱动层与inputflinger层之间是通过Linux的设备驱动节点进行连接，inputflinger与应用层
+          
       
       
     </div>
@@ -352,6 +411,10 @@
         <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/chongyuzhao.github.io/tags/Android/" rel="tag">Android</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/chongyuzhao.github.io/tags/input/" rel="tag">input</a></li></ul>
     </div>
 
+      
+        <p class="article-more-link">
+          <a  href="/chongyuzhao.github.io/2020/03/15/Android-input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-%E5%BC%80%E7%AF%87/#more">打开魔盒 >></a>
+        </p>
       
       <div class="clearfix"></div>
     </div>
@@ -426,6 +489,27 @@
 
 
 
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
 <div class="scroll" id="scroll">
     <a href="#"><i class="fa fa-arrow-up"></i></a>
     <a href="#comments"><i class="fa fa-comments-o"></i></a>
@@ -468,6 +552,23 @@
     });
 </script>
 
+
+    <script type="text/javascript">
+      window.onload = function(){
+        document.getElementById("search").onclick = function(){
+            console.log("search")
+            search();
+        }
+      }
+      function search(){
+        (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+        (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+        e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+        })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+        _st('install','A1Pz-LKMXbrzcFg2FWi6','2.0.0');
+      }
+    </script>
 
 
   <script src='https://unpkg.com/mermaid@7.1.2/dist/mermaid.min.js'></script>
