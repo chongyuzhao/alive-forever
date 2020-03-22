@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Android多屏幕专题--双Home的启动 | Alive</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="Android多屏幕专题 – 双Home的启动 ​ 在一个偶然的机会下，发现AndroidQ是支持两个Launcher的，在两个显示设备的情况下，可以分别启动两个Launcher，在这两个Launcher中都可以操作，如打开应用，虚拟导航栏等，也就是说，使用这种模式，是可以同时打开两个应用分别操作。  ​ 启动双Home的方式，首先是这个Android系统不能是低内存设备(low ram devi">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android多屏幕专题--双Home的启动">
+<meta property="og:url" content="https://chongyuzhao.github.io/2020/03/22/Android%E5%A4%9A%E5%B1%8F%E5%B9%95%E4%B8%93%E9%A2%98-%E5%8F%8CHome%E7%9A%84%E5%90%AF%E5%8A%A8/index.html">
+<meta property="og:site_name" content="Alive">
+<meta property="og:description" content="Android多屏幕专题 – 双Home的启动 ​ 在一个偶然的机会下，发现AndroidQ是支持两个Launcher的，在两个显示设备的情况下，可以分别启动两个Launcher，在这两个Launcher中都可以操作，如打开应用，虚拟导航栏等，也就是说，使用这种模式，是可以同时打开两个应用分别操作。  ​ 启动双Home的方式，首先是这个Android系统不能是低内存设备(low ram devi">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-03-22T02:54:36.000Z">
+<meta property="article:modified_time" content="2020-03-22T12:39:29.023Z">
+<meta property="article:author" content="chongyuzhao">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="AMS">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternative" href="/atom.xml" title="Alive" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/chongyuzhao.github.io/img/favicon.jpg">
+  
+  
+      
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  
+  
+<link rel="stylesheet" href="/chongyuzhao.github.io/css/style.css">
+
+  <link rel="stylesheet" href="/chongyuzhao.github.io/font-awesome/css/font-awesome.min.css">
+  <link rel="apple-touch-icon" href="/chongyuzhao.github.io/apple-touch-icon.png">
+  
+  
+      <link rel="stylesheet" href="/chongyuzhao.github.io/fancybox/jquery.fancybox.css">
+  
+  <!-- 加载特效 -->
+    <script src="/chongyuzhao.github.io/js/pace.js"></script>
+    <link href="/chongyuzhao.github.io/css/pace/pace-theme-flash.css" rel="stylesheet" />
+  <script>
+      var yiliaConfig = {
+          rootUrl: '/chongyuzhao.github.io/',
+          fancybox: true,
+          animate: true,
+          isHome: false,
+          isPost: true,
+          isArchive: false,
+          isTag: false,
+          isCategory: false,
+          open_in_new: false
+      }
+  </script>
+<meta name="generator" content="Hexo 4.2.0"></head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/chongyuzhao.github.io/" class="profilepic">
+            
+            <img lazy-src="/chongyuzhao.github.io/img/head.jpg" class="js-avatar">
+            
+        </a>
+
+        <hgroup>
+          <h1 class="header-author"><a href="/chongyuzhao.github.io/" title="Hi Mate">chongyuzhao</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">just forever</p>
+        
+        
+            <form>
+                <input type="text" class="st-default-search-input search" id="search" placeholder=" Search...">
+            </form>
+        
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/chongyuzhao.github.io/Home">博客首页</a></li>
+                        
+                            <li><a href="/chongyuzhao.github.io/works">作品展示</a></li>
+                        
+                            <li><a href="/chongyuzhao.github.io/about">留言打卡</a></li>
+                        
+                            <li><a href="/chongyuzhao.github.io/FrontEndGuide">前端导航</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fl mail" target="_blank" href="/chongyuzhao.github.io/chongyu_Zhao@163.com" title="mail">mail</a>
+                            
+                                <a class="fl github" target="_blank" href="https://github.com/chongyuzhao" title="github">github</a>
+                            
+                                <a class="fl zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
+                            
+                                <a class="fl weibo" target="_blank" href="#" title="weibo">weibo</a>
+                            
+                                <a class="fl google" target="_blank" href="#" title="google">google</a>
+                            
+                                <a class="fl twitter" target="_blank" href="#" title="twitter">twitter</a>
+                            
+                                <a class="fl linkedin" target="_blank" href="#" title="linkedin">linkedin</a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <a href="/chongyuzhao.github.io/tags/AMS/" style="font-size: 13.33px;">AMS</a> <a href="/chongyuzhao.github.io/tags/Android/" style="font-size: 20px;">Android</a> <a href="/chongyuzhao.github.io/tags/Input/" style="font-size: 16.67px;">Input</a> <a href="/chongyuzhao.github.io/tags/WMS/" style="font-size: 10px;">WMS</a> <a href="/chongyuzhao.github.io/tags/input/" style="font-size: 10px;">input</a>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a target="_blank" class="main-nav-link switch-friends-link" href="http://chongyuzhao.github.io/">name</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/chongyuzhao.github.io/" title="Me">chongyuzhao</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/chongyuzhao.github.io/" class="profilepic">
+                
+                    <img lazy-src="/chongyuzhao.github.io/img/head.jpg" class="js-avatar">
+                
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/chongyuzhao.github.io/" title="Me">chongyuzhao</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">just forever</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/chongyuzhao.github.io/Home">博客首页</a></li>
+                
+                    <li><a href="/chongyuzhao.github.io/works">作品展示</a></li>
+                
+                    <li><a href="/chongyuzhao.github.io/about">留言打卡</a></li>
+                
+                    <li><a href="/chongyuzhao.github.io/FrontEndGuide">前端导航</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a class="mail" target="_blank" href="/chongyuzhao.github.io/chongyu_Zhao@163.com" title="mail">mail</a>
+                    
+                        <a class="github" target="_blank" href="https://github.com/chongyuzhao" title="github">github</a>
+                    
+                        <a class="zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
+                    
+                        <a class="weibo" target="_blank" href="#" title="weibo">weibo</a>
+                    
+                        <a class="google" target="_blank" href="#" title="google">google</a>
+                    
+                        <a class="twitter" target="_blank" href="#" title="twitter">twitter</a>
+                    
+                        <a class="linkedin" target="_blank" href="#" title="linkedin">linkedin</a>
+                    
+                </div>
+            </nav>
+        </header>                
+    </div>
+</nav>
+      <div class="body-wrap"><article id="post-Android多屏幕专题-双Home的启动" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/chongyuzhao.github.io/2020/03/22/Android%E5%A4%9A%E5%B1%8F%E5%B9%95%E4%B8%93%E9%A2%98-%E5%8F%8CHome%E7%9A%84%E5%90%AF%E5%8A%A8/" class="article-date">
+      <time datetime="2020-03-22T02:54:36.000Z" itemprop="datePublished">2020-03-22</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Android多屏幕专题--双Home的启动
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/chongyuzhao.github.io/tags/AMS/" rel="tag">AMS</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/chongyuzhao.github.io/tags/Android/" rel="tag">Android</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <h1 id="Android多屏幕专题-–-双Home的启动"><a href="#Android多屏幕专题-–-双Home的启动" class="headerlink" title="Android多屏幕专题 – 双Home的启动"></a>Android多屏幕专题 – 双Home的启动</h1><p>​    在一个偶然的机会下，发现AndroidQ是支持两个Launcher的，在两个显示设备的情况下，可以分别启动两个Launcher，在这两个Launcher中都可以操作，如打开应用，虚拟导航栏等，也就是说，使用这种模式，是可以同时打开两个应用分别操作。</p>
+<p>​    启动双Home的方式，首先是这个Android系统不能是低内存设备(low ram device)，其次可通过<code>settings put global force_desktop_mode_on_external_displays 1</code>，重启后两个显示器上就有不同的Home了。</p>
+<p>​    下面我们就来看看这个settings字段是如何控制双Home的启动。前面的代码追溯我们就不一一展开，直接从SystemServer启动完成后就会调用AMS的systemReady方法，而在AMS的systemReady中就会去启动我们的Launcher:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"> <span class="number">8960</span>     <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">systemReady</span><span class="params">(<span class="keyword">final</span> Runnable goingCallback, TimingsTraceLog traceLog)</span> </span>&#123;</span><br><span class="line">     	……</span><br><span class="line"> <span class="number">9076</span>             mAtmInternal.startHomeOnAllDisplays(currentUserId, <span class="string">"systemReady"</span>);</span><br><span class="line">     	……</span><br><span class="line"> <span class="number">9136</span>     &#125;</span><br><span class="line"></span><br><span class="line"><span class="number">6691</span>         <span class="meta">@Override</span></span><br><span class="line"><span class="number">6692</span>         <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">startHomeOnAllDisplays</span><span class="params">(<span class="keyword">int</span> userId, String reason)</span> </span>&#123;</span><br><span class="line"><span class="number">6693</span>             <span class="keyword">synchronized</span> (mGlobalLock) &#123;</span><br><span class="line"><span class="number">6694</span>                 <span class="keyword">return</span> mRootActivityContainer.startHomeOnAllDisplays(userId, reason);</span><br><span class="line"><span class="number">6695</span>             &#125;</span><br><span class="line"><span class="number">6696</span>         &#125;</span><br><span class="line"></span><br><span class="line"> <span class="number">332</span>     <span class="function"><span class="keyword">boolean</span> <span class="title">startHomeOnAllDisplays</span><span class="params">(<span class="keyword">int</span> userId, String reason)</span> </span>&#123;</span><br><span class="line"> <span class="number">333</span>         <span class="keyword">boolean</span> homeStarted = <span class="keyword">false</span>;</span><br><span class="line"> <span class="number">334</span>         <span class="keyword">for</span> (<span class="keyword">int</span> i = mActivityDisplays.size() - <span class="number">1</span>; i &gt;= <span class="number">0</span>; i--) &#123;</span><br><span class="line"> <span class="number">335</span>             <span class="keyword">final</span> <span class="keyword">int</span> displayId = mActivityDisplays.get(i).mDisplayId;</span><br><span class="line"> <span class="number">336</span>             homeStarted |= startHomeOnDisplay(userId, reason, displayId);</span><br><span class="line"> <span class="number">337</span>         &#125;</span><br><span class="line"> <span class="number">338</span>         <span class="keyword">return</span> homeStarted;</span><br><span class="line"> <span class="number">339</span>     &#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="startHomeOnDisplay"><a href="#startHomeOnDisplay" class="headerlink" title="startHomeOnDisplay"></a>startHomeOnDisplay</h2><p>​    mActivityDisplays中记录了启动过程中所注册进来的display，在AMS中，使用ActivityDisplay来描述显示屏，这里的<code>startHomeOnAllDisplays</code>就是去为所有的显示屏去启动一个Home，当然啦，并不是一定会为每个屏幕都启动一个Home.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">350</span>     <span class="function"><span class="keyword">boolean</span> <span class="title">startHomeOnDisplay</span><span class="params">(<span class="keyword">int</span> userId, String reason, <span class="keyword">int</span> displayId)</span> </span>&#123;</span><br><span class="line"><span class="number">351</span>         <span class="keyword">return</span> startHomeOnDisplay(userId, reason, displayId, <span class="keyword">false</span> <span class="comment">/* allowInstrumenting */</span>,</span><br><span class="line"><span class="number">352</span>                 <span class="keyword">false</span> <span class="comment">/* fromHomeKey */</span>);</span><br><span class="line"><span class="number">353</span>     &#125;</span><br><span class="line"><span class="number">366</span>     <span class="function"><span class="keyword">boolean</span> <span class="title">startHomeOnDisplay</span><span class="params">(<span class="keyword">int</span> userId, String reason, <span class="keyword">int</span> displayId, <span class="keyword">boolean</span> allowInstrumenting,</span></span></span><br><span class="line"><span class="function"><span class="params"><span class="number">367</span>             <span class="keyword">boolean</span> fromHomeKey)</span> </span>&#123;</span><br><span class="line"><span class="number">368</span>         <span class="comment">// Fallback to top focused display if the displayId is invalid.</span></span><br><span class="line"><span class="number">369</span>         <span class="keyword">if</span> (displayId == INVALID_DISPLAY) &#123;</span><br><span class="line"><span class="number">370</span>             displayId = getTopDisplayFocusedStack().mDisplayId;</span><br><span class="line"><span class="number">371</span>         &#125;</span><br><span class="line"><span class="number">372</span></span><br><span class="line"><span class="number">373</span>         Intent homeIntent = <span class="keyword">null</span>;</span><br><span class="line"><span class="number">374</span>         ActivityInfo aInfo = <span class="keyword">null</span>;</span><br><span class="line"><span class="number">375</span>         <span class="keyword">if</span> (displayId == DEFAULT_DISPLAY) &#123;</span><br><span class="line"><span class="number">376</span>             homeIntent = mService.getHomeIntent();</span><br><span class="line"><span class="number">377</span>             aInfo = resolveHomeActivity(userId, homeIntent);</span><br><span class="line"><span class="number">378</span>         &#125; <span class="keyword">else</span> <span class="keyword">if</span> (shouldPlaceSecondaryHomeOnDisplay(displayId)) &#123;</span><br><span class="line"><span class="number">379</span>             Pair&lt;ActivityInfo, Intent&gt; info = resolveSecondaryHomeActivity(userId, displayId);</span><br><span class="line"><span class="number">380</span>             aInfo = info.first;</span><br><span class="line"><span class="number">381</span>             homeIntent = info.second;</span><br><span class="line"><span class="number">382</span>         &#125;</span><br><span class="line"><span class="number">383</span>         <span class="keyword">if</span> (aInfo == <span class="keyword">null</span> || homeIntent == <span class="keyword">null</span>) &#123;</span><br><span class="line"><span class="number">384</span>             <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line"><span class="number">385</span>         &#125;</span><br><span class="line"><span class="number">386</span></span><br><span class="line"><span class="number">387</span>         <span class="keyword">if</span> (!canStartHomeOnDisplay(aInfo, displayId, allowInstrumenting)) &#123;</span><br><span class="line"><span class="number">388</span>             <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line"><span class="number">389</span>         &#125;</span><br><span class="line"><span class="number">390</span></span><br><span class="line"><span class="number">391</span>         <span class="comment">// Updates the home component of the intent.</span></span><br><span class="line"><span class="number">392</span>         homeIntent.setComponent(<span class="keyword">new</span> ComponentName(aInfo.applicationInfo.packageName, aInfo.name));</span><br><span class="line"><span class="number">393</span>         homeIntent.setFlags(homeIntent.getFlags() | FLAG_ACTIVITY_NEW_TASK);</span><br><span class="line"><span class="number">394</span>         <span class="comment">// Updates the extra information of the intent.</span></span><br><span class="line"><span class="number">395</span>         <span class="keyword">if</span> (fromHomeKey) &#123;</span><br><span class="line"><span class="number">396</span>             homeIntent.putExtra(WindowManagerPolicy.EXTRA_FROM_HOME_KEY, <span class="keyword">true</span>);</span><br><span class="line"><span class="number">397</span>         &#125;</span><br><span class="line"><span class="number">398</span>         <span class="comment">// Update the reason for ANR debugging to verify if the user activity is the one that</span></span><br><span class="line"><span class="number">399</span>         <span class="comment">// actually launched.</span></span><br><span class="line"><span class="number">400</span>         <span class="keyword">final</span> String myReason = reason + <span class="string">":"</span> + userId + <span class="string">":"</span> + UserHandle.getUserId(</span><br><span class="line"><span class="number">401</span>                 aInfo.applicationInfo.uid) + <span class="string">":"</span> + displayId;</span><br><span class="line"><span class="number">402</span>         mService.getActivityStartController().startHomeActivity(homeIntent, aInfo, myReason,</span><br><span class="line"><span class="number">403</span>                 displayId);</span><br><span class="line"><span class="number">404</span>         <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line"><span class="number">405</span>     &#125;</span><br></pre></td></tr></table></figure>
+
+<p>​    当displayId等于DEFAULT_DISPLAY，即主显的时候，必然会给其找一个Launcher进行启动。当displayId不是DEFAULT_DISPLAY，即非主显时，就要过三关了：</p>
+<p>​    第一关，系统是否支持SecondaryHomeOnDisplay–<code>shouldPlaceSecondaryHomeOnDisplay</code>，如果系统没有配置打开，那么AMS就不会启动双Home了。</p>
+<p>​    第二关，系统中有定义SecondaryHomeActivity–<code>resolveSecondaryHomeActivity</code>，如果没有第二个Launcher，那么也就没有可以使用的Activity，AMS根本就没法启动。</p>
+<p>​    第三关，检查是否允许在对应的display中启动Home–<code>canStartHomeOnDisplay</code>，如果是AMS在启动的时候，是不会有问题的。</p>
+<h3 id="shouldPlaceSecondaryHomeOnDisplay"><a href="#shouldPlaceSecondaryHomeOnDisplay" class="headerlink" title="shouldPlaceSecondaryHomeOnDisplay"></a>shouldPlaceSecondaryHomeOnDisplay</h3><p>​    先看第一关考验的内容：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">540</span>     <span class="function"><span class="keyword">boolean</span> <span class="title">shouldPlaceSecondaryHomeOnDisplay</span><span class="params">(<span class="keyword">int</span> displayId)</span> </span>&#123;</span><br><span class="line"><span class="number">541</span>         <span class="keyword">if</span> (displayId == DEFAULT_DISPLAY) &#123;</span><br><span class="line"><span class="number">542</span>             <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(</span><br><span class="line"><span class="number">543</span>                     <span class="string">"shouldPlaceSecondaryHomeOnDisplay: Should not be DEFAULT_DISPLAY"</span>);</span><br><span class="line"><span class="number">544</span>         &#125; <span class="keyword">else</span> <span class="keyword">if</span> (displayId == INVALID_DISPLAY) &#123;</span><br><span class="line"><span class="number">545</span>             <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line"><span class="number">546</span>         &#125;</span><br><span class="line"><span class="number">547</span></span><br><span class="line"><span class="number">548</span>         <span class="keyword">if</span> (!mService.mSupportsMultiDisplay) &#123;</span><br><span class="line"><span class="number">549</span>             <span class="comment">// Can't launch home on secondary display if device does not support multi-display.</span></span><br><span class="line"><span class="number">550</span>             <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line"><span class="number">551</span>         &#125;</span><br><span class="line"><span class="number">552</span></span><br><span class="line"><span class="number">553</span>         <span class="keyword">final</span> <span class="keyword">boolean</span> deviceProvisioned = Settings.Global.getInt(</span><br><span class="line"><span class="number">554</span>                 mService.mContext.getContentResolver(),</span><br><span class="line"><span class="number">555</span>                 Settings.Global.DEVICE_PROVISIONED, <span class="number">0</span>) != <span class="number">0</span>;</span><br><span class="line"><span class="number">556</span>         <span class="keyword">if</span> (!deviceProvisioned) &#123;</span><br><span class="line"><span class="number">557</span>             <span class="comment">// Can't launch home on secondary display before device is provisioned.</span></span><br><span class="line"><span class="number">558</span>             <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line"><span class="number">559</span>         &#125;</span><br><span class="line"><span class="number">560</span></span><br><span class="line"><span class="number">561</span>         <span class="keyword">if</span> (!StorageManager.isUserKeyUnlocked(mCurrentUser)) &#123;</span><br><span class="line"><span class="number">562</span>             <span class="comment">// Can't launch home on secondary displays if device is still locked.</span></span><br><span class="line"><span class="number">563</span>             <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line"><span class="number">564</span>         &#125;</span><br><span class="line"><span class="number">565</span></span><br><span class="line"><span class="number">566</span>         <span class="keyword">final</span> ActivityDisplay display = getActivityDisplay(displayId);</span><br><span class="line"><span class="number">567</span>         <span class="keyword">if</span> (display == <span class="keyword">null</span> || display.isRemoved() || !display.supportsSystemDecorations()) &#123;</span><br><span class="line"><span class="number">568</span>             <span class="comment">// Can't launch home on display that doesn't support system decorations.</span></span><br><span class="line"><span class="number">569</span>             <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line"><span class="number">570</span>         &#125;</span><br><span class="line"><span class="number">571</span></span><br><span class="line"><span class="number">572</span>         <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line"><span class="number">573</span>     &#125;</span><br></pre></td></tr></table></figure>
+
+
+      
+      
+        <div class="page-reward">
+          <p><a href="javascript:void(0)" onclick="dashangToggle()" class="dashang">赏</a></p>
+          <div class="hide_box"></div>
+          <div class="shang_box">
+            <a class="shang_close" href="javascript:void(0)" onclick="dashangToggle()">×</a>
+            <div class="shang_tit">
+              <p>纯属好玩</p>
+            </div>
+            <div class="shang_payimg">
+              <img src="/img/alipayimg.jpg" alt="扫码支持" title="扫一扫" />
+            </div>
+              <div class="pay_explain">扫码打赏，你说多少就多少</div>
+            <div class="shang_payselect">
+              
+                <div class="pay_item checked" data-id="alipay">
+                  <span class="radiobox"></span>
+                  <span class="pay_logo"><img src="/img/alipay.png" alt="支付宝" /></span>
+                </div>
+              
+              
+                <div class="pay_item" data-id="wechat">
+                  <span class="radiobox"></span>
+                  <span class="pay_logo"><img src="/img/weixin.png" alt="微信" /></span>
+                </div>
+              
+            </div>
+            <div class="shang_info">
+              <p>打开<span id="shang_pay_txt">支付宝</span>扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+        </div>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/zepto/1.2.0/zepto.min.js"></script>
+        <script type="text/javascript">
+          $(".pay_item").click(function(){
+            $(this).addClass('checked').siblings('.pay_item').removeClass('checked');
+            var dataid=$(this).attr('data-id');
+            $(".shang_payimg img").attr("src","/img/"+dataid+"img.jpg");
+            $("#shang_pay_txt").text(dataid=="alipay"?"支付宝":"微信");
+          });
+          function dashangToggle(){
+            
+            $(".hide_box").fadeToggle();
+            $(".shang_box").fadeToggle();
+          }
+        </script>
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/chongyuzhao.github.io/2020/03/22/Android%E5%A4%9A%E5%B1%8F%E5%B9%95%E4%B8%93%E9%A2%98-%E5%8F%8CHome%E7%9A%84%E5%90%AF%E5%8A%A8/">Android多屏幕专题--双Home的启动</a></p>
+        <p><span>文章作者:</span><a href="/chongyuzhao.github.io/" title="访问 chongyuzhao 的个人博客">chongyuzhao</a></p>
+        <p><span>发布时间:</span>2020年03月22日 - 10时54分</p>
+        <p><span>最后更新:</span>2020年03月22日 - 20时39分</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/chongyuzhao.github.io/2020/03/22/Android%E5%A4%9A%E5%B1%8F%E5%B9%95%E4%B8%93%E9%A2%98-%E5%8F%8CHome%E7%9A%84%E5%90%AF%E5%8A%A8/" title="Android多屏幕专题--双Home的启动">https://chongyuzhao.github.io/2020/03/22/Android%E5%A4%9A%E5%B1%8F%E5%B9%95%E4%B8%93%E9%A2%98-%E5%8F%8CHome%E7%9A%84%E5%90%AF%E5%8A%A8/</a>
+            <span class="copy-path" data-clipboard-text="原文: https://chongyuzhao.github.io/2020/03/22/Android%E5%A4%9A%E5%B1%8F%E5%B9%95%E4%B8%93%E9%A2%98-%E5%8F%8CHome%E7%9A%84%E5%90%AF%E5%8A%A8/　　作者: chongyuzhao" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script src="/chongyuzhao.github.io/js/clipboard.min.js"></script>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" title="中国大陆 (CC BY-NC-SA 3.0 CN)" target = "_blank">"署名-非商用-相同方式共享 3.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+<nav id="article-nav">
+  
+  
+    <a href="/chongyuzhao.github.io/2020/03/21/Android%E5%A4%9A%E5%B1%8F%E5%B9%95%E4%B8%93%E9%A2%98-%E5%BC%80%E7%AF%87/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Android多屏幕专题--开篇</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Android多屏幕专题-–-双Home的启动"><span class="toc-number">1.</span> <span class="toc-text">Android多屏幕专题 – 双Home的启动</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#startHomeOnDisplay"><span class="toc-number">1.1.</span> <span class="toc-text">startHomeOnDisplay</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#shouldPlaceSecondaryHomeOnDisplay"><span class="toc-number">1.1.1.</span> <span class="toc-text">shouldPlaceSecondaryHomeOnDisplay</span></a></li></ol></li></ol></li></ol>
+</div>
+<input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+
+<script src="https://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+
+<script>
+    var valueHide = "隐藏目录";
+    var valueShow = "显示目录";
+
+    if ($(".left-col").is(":hidden")) {
+        $("#tocButton").attr("value", valueShow);
+    }
+    $("#tocButton").click(function() {
+        if ($("#toc").is(":hidden")) {
+            $("#tocButton").attr("value", valueHide);
+            $("#toc").slideDown(320);
+        }
+        else {
+            $("#tocButton").attr("value", valueShow);
+            $("#toc").slideUp(350);
+        }
+    })
+    if ($(".toc").length < 1) {
+        $("#toc, #tocButton").hide();
+    }
+</script>
+
+
+
+
+
+<div class="bdsharebuttonbox">
+	<a href="#" class="fx fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+	<a href="#" class="fx fa-weixin bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+	<a href="#" class="fx fa-qq bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+	<a href="#" class="fx fa-facebook-official bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+	<a href="#" class="fx fa-twitter bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+	<a href="#" class="fx fa-linkedin bds_linkedin" data-cmd="linkedin" title="分享到linkedin"></a>
+	<a href="#" class="fx fa-files-o bds_copy" data-cmd="copy" title="分享到复制网址"></a>
+</div>
+<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"2","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/chongyuzhao.github.io/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+
+
+
+
+    
+        <div id="gitments"></div>
+<script src="/chongyuzhao.github.io/js/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+      id: window.location.pathname,
+      owner: 'zcy',
+      repo: 'chongyuzhao.github.io',
+      oauth: {
+        client_id: '',
+        client_secret: '',
+      },
+    })
+    gitment.render('gitments')
+</script>
+    
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/chongyuzhao.github.io/" title="回到主页"><i class="fa fa-home"></i></a>
+        
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+        
+            <a href="/chongyuzhao.github.io/2020/03/21/Android%E5%A4%9A%E5%B1%8F%E5%B9%95%E4%B8%93%E9%A2%98-%E5%BC%80%E7%AF%87/" title="下一篇: Android多屏幕专题--开篇">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/chongyuzhao.github.io/2020/03/22/Android%E5%A4%9A%E5%B1%8F%E5%B9%95%E4%B8%93%E9%A2%98-%E5%8F%8CHome%E7%9A%84%E5%90%AF%E5%8A%A8/">Android多屏幕专题--双Home的启动</a></li><li class="post-list-item"><a class="post-list-link" href="/chongyuzhao.github.io/2020/03/21/Android%E5%A4%9A%E5%B1%8F%E5%B9%95%E4%B8%93%E9%A2%98-%E5%BC%80%E7%AF%87/">Android多屏幕专题--开篇</a></li><li class="post-list-item"><a class="post-list-link" href="/chongyuzhao.github.io/2020/03/20/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-%E8%BE%93%E5%85%A5%E8%B7%AF%E7%94%B1/">Android Input子系统专题-输入路由</a></li><li class="post-list-item"><a class="post-list-link" href="/chongyuzhao.github.io/2020/03/15/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger/">Android Input子系统专题-InputFlinger(一)</a></li><li class="post-list-item"><a class="post-list-link" href="/chongyuzhao.github.io/2020/03/15/Android-input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-%E5%BC%80%E7%AF%87/">Android input子系统专题--开篇</a></li></ul>
+    <script src="https://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+    <script>
+        $(".post-list").addClass("toc-article");
+        $(".post-list-item a").attr("target","_blank");
+        $("#post-nav-button > a:nth-child(2)").click(function() {
+            $(".fa-bars, .fa-times").toggle();
+            $(".post-list").toggle(300);
+            if ($(".toc").length > 0) {
+                $("#toc, #tocButton").toggle(200, function() {
+                    if ($(".switch-area").is(":visible")) {
+                        $("#tocButton").attr("value", valueHide);
+                        }
+                    })
+            }
+            else {
+            }
+        })
+    </script>
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                &copy; 2020 chongyuzhao
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/luuman/hexo-theme-spfk" target="_blank">spfk</a> by luuman
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" >海贼到访数: 
+                            <span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>, </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit">本页阅读量: 
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+
+    </div>
+    
+<script src="https://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+
+
+<script src="/chongyuzhao.github.io/js/main.js"></script>
+
+
+    <script>
+        $(document).ready(function() {
+            var backgroundnum = 24;
+            var backgroundimg = "url(/chongyuzhao.github.io/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+            $("#mobile-nav").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+            $(".left-col").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+        })
+    </script>
+
+
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    $(document).ready(function() {
+        if ($("#comments").length < 1) {
+            $("#scroll > a:nth-child(2)").hide();
+        };
+    })
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+  <script language="javascript">
+    $(function() {
+        $("a[title]").each(function() {
+            var a = $(this);
+            var title = a.attr('title');
+            if (title == undefined || title == "") return;
+            a.data('title', title).removeAttr('title').hover(
+
+            function() {
+                var offset = a.offset();
+                $("<div id=\"anchortitlecontainer\"></div>").appendTo($("body")).html(title).css({
+                    top: offset.top - a.outerHeight() - 15,
+                    left: offset.left + a.outerWidth()/2 + 1
+                }).fadeIn(function() {
+                    var pop = $(this);
+                    setTimeout(function() {
+                        pop.remove();
+                    }, pop.text().length * 800);
+                });
+            }, function() {
+                $("#anchortitlecontainer").remove();
+            });
+        });
+    });
+</script>
+
+
+    <script type="text/javascript">
+      window.onload = function(){
+        document.getElementById("search").onclick = function(){
+            console.log("search")
+            search();
+        }
+      }
+      function search(){
+        (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+        (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+        e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+        })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+        _st('install','A1Pz-LKMXbrzcFg2FWi6','2.0.0');
+      }
+    </script>
+
+
+  <script src='https://unpkg.com/mermaid@7.1.2/dist/mermaid.min.js'></script>
+  <script>
+    if (window.mermaid) {
+      mermaid.initialize({theme: 'forest'});
+    }
+  </script>
+
+
+  </div>
+</body>
+</html>
