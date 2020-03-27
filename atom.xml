@@ -6,7 +6,7 @@
   <link href="/chongyuzhao.github.io/atom.xml" rel="self"/>
   
   <link href="https://chongyuzhao.github.io/"/>
-  <updated>2020-03-26T11:18:54.496Z</updated>
+  <updated>2020-03-27T14:02:41.460Z</updated>
   <id>https://chongyuzhao.github.io/</id>
   
   <author>
@@ -15,6 +15,27 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Android-Input子系统专题-InputFlinger(二)之InputReader</title>
+    <link href="https://chongyuzhao.github.io/2020/03/26/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%BA%8C)%E4%B9%8BInputReader/"/>
+    <id>https://chongyuzhao.github.io/2020/03/26/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%BA%8C)%E4%B9%8BInputReader/</id>
+    <published>2020-03-26T13:25:56.000Z</published>
+    <updated>2020-03-27T14:02:41.460Z</updated>
+    
+    <summary type="html">
+    
+      ​ 从InputFlinger的启动篇我们可以知道，InputReader是InputFlinger的核心之一，我们这一篇就围绕这InputReader进行分析研究。
+    
+    </summary>
+    
+    
+    
+      <category term="Android" scheme="https://chongyuzhao.github.io/tags/Android/"/>
+    
+      <category term="Input" scheme="https://chongyuzhao.github.io/tags/Input/"/>
+    
+  </entry>
   
   <entry>
     <title>Android多屏幕专题--双Home的启动</title>
@@ -63,20 +84,20 @@
     
       <category term="Android" scheme="https://chongyuzhao.github.io/tags/Android/"/>
     
-      <category term="Input" scheme="https://chongyuzhao.github.io/tags/Input/"/>
-    
       <category term="AMS" scheme="https://chongyuzhao.github.io/tags/AMS/"/>
     
       <category term="WMS" scheme="https://chongyuzhao.github.io/tags/WMS/"/>
+    
+      <category term="Input" scheme="https://chongyuzhao.github.io/tags/Input/"/>
     
   </entry>
   
   <entry>
     <title>Android Input子系统专题-输入路由</title>
-    <link href="https://chongyuzhao.github.io/2020/03/20/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-%E8%BE%93%E5%85%A5%E8%B7%AF%E7%94%B1/"/>
-    <id>https://chongyuzhao.github.io/2020/03/20/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-%E8%BE%93%E5%85%A5%E8%B7%AF%E7%94%B1/</id>
+    <link href="https://chongyuzhao.github.io/2020/03/20/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-%E8%BE%93%E5%85%A5%E8%B7%AF%E7%94%B1/"/>
+    <id>https://chongyuzhao.github.io/2020/03/20/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-%E8%BE%93%E5%85%A5%E8%B7%AF%E7%94%B1/</id>
     <published>2020-03-20T13:19:34.000Z</published>
-    <updated>2020-03-24T13:16:13.298Z</updated>
+    <updated>2020-03-27T14:01:23.135Z</updated>
     
     <summary type="html">
     
@@ -97,15 +118,15 @@
   
   <entry>
     <title>Android Input子系统专题-InputFlinger(一)</title>
-    <link href="https://chongyuzhao.github.io/2020/03/15/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger/"/>
-    <id>https://chongyuzhao.github.io/2020/03/15/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger/</id>
+    <link href="https://chongyuzhao.github.io/2020/03/15/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%B8%80)/"/>
+    <id>https://chongyuzhao.github.io/2020/03/15/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%B8%80)/</id>
     <published>2020-03-15T13:39:40.000Z</published>
-    <updated>2020-03-25T15:07:26.005Z</updated>
+    <updated>2020-03-27T14:04:52.909Z</updated>
     
     <summary type="html">
     
       InputFlinger的启动
-​ InputFlinger的源码在frameworks/native/services/inputflinger目录下，其是作为一个lib而存在，因此启动的代码也并不在这里。InputFlinger实际上是通过IMS的JNI启动起来的，在InputFlinger的源码目录下，是没有InputFlinger这么一个东西，host目录下的内容实际上并没有使用到。虽然没有InputFlinger这个类，但既然
+​ InputFlinger的源码在frameworks/native/services/inputflinger目录下，其是作为一个lib而存在，因此启动的代码也并不在这里。InputFlinger实际上是通过IMS的JNI启动起来的，在InputFlinger的源码目录下，是没有InputFlinger这么一个东西，host目录下的内容实际上并没有使用到。虽然没有InputFlinger这个类，但既然叫InputFlinger，那当然与这个名字有关系，我们可以看到，有一个BnInputFlinger的接口，而InputManager继承了这个接口，说明Inp
     
     </summary>
     
@@ -119,10 +140,10 @@
   
   <entry>
     <title>Android input子系统专题--开篇</title>
-    <link href="https://chongyuzhao.github.io/2020/03/15/Android-input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-%E5%BC%80%E7%AF%87/"/>
-    <id>https://chongyuzhao.github.io/2020/03/15/Android-input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-%E5%BC%80%E7%AF%87/</id>
+    <link href="https://chongyuzhao.github.io/2020/03/15/input/Android-input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-%E5%BC%80%E7%AF%87/"/>
+    <id>https://chongyuzhao.github.io/2020/03/15/input/Android-input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-%E5%BC%80%E7%AF%87/</id>
     <published>2020-03-15T05:16:00.000Z</published>
-    <updated>2020-03-16T15:28:29.162Z</updated>
+    <updated>2020-03-27T14:00:47.055Z</updated>
     
     <summary type="html">
     
