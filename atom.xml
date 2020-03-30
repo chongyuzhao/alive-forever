@@ -6,7 +6,7 @@
   <link href="/chongyuzhao.github.io/atom.xml" rel="self"/>
   
   <link href="https://chongyuzhao.github.io/"/>
-  <updated>2020-03-27T14:02:41.460Z</updated>
+  <updated>2020-03-30T15:27:15.171Z</updated>
   <id>https://chongyuzhao.github.io/</id>
   
   <author>
@@ -21,11 +21,27 @@
     <link href="https://chongyuzhao.github.io/2020/03/26/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%BA%8C)%E4%B9%8BInputReader/"/>
     <id>https://chongyuzhao.github.io/2020/03/26/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%BA%8C)%E4%B9%8BInputReader/</id>
     <published>2020-03-26T13:25:56.000Z</published>
-    <updated>2020-03-27T14:02:41.460Z</updated>
+    <updated>2020-03-30T15:27:15.171Z</updated>
     
     <summary type="html">
     
       ​ 从InputFlinger的启动篇我们可以知道，InputReader是InputFlinger的核心之一，我们这一篇就围绕这InputReader进行分析研究。
+
+​ InputReader从名字上来看，就知道InputReader的主要作用就是读取Input事件，这个Input事件包括设备的插拔事件、设备的上报事件。本文档主要就从这两种事件的读取和处理过程进行学习。
+
+InputReader的运行
+
+
+​ 我们在InputFlinger那一篇文章中有提到过InputReader的创建：
+
+1
+2
+3
+4
+5
+
+
+22 sp&lt;InputReaderInterface&gt; createInp
     
     </summary>
     

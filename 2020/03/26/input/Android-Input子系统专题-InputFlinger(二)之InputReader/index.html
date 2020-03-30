@@ -5,19 +5,24 @@
   
   <title>Android-Input子系统专题-InputFlinger(二)之InputReader | Alive</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="​ 从InputFlinger的启动篇我们可以知道，InputReader是InputFlinger的核心之一，我们这一篇就围绕这InputReader进行分析研究。">
+  <meta name="description" content="​ 从InputFlinger的启动篇我们可以知道，InputReader是InputFlinger的核心之一，我们这一篇就围绕这InputReader进行分析研究。  ​ InputReader从名字上来看，就知道InputReader的主要作用就是读取Input事件，这个Input事件包括设备的插拔事件、设备的上报事件。本文档主要就从这两种事件的读取和处理过程进行学习。  InputReade">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Android-Input子系统专题-InputFlinger(二)之InputReader">
 <meta property="og:url" content="https://chongyuzhao.github.io/2020/03/26/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%BA%8C)%E4%B9%8BInputReader/index.html">
 <meta property="og:site_name" content="Alive">
-<meta property="og:description" content="​ 从InputFlinger的启动篇我们可以知道，InputReader是InputFlinger的核心之一，我们这一篇就围绕这InputReader进行分析研究。">
+<meta property="og:description" content="​ 从InputFlinger的启动篇我们可以知道，InputReader是InputFlinger的核心之一，我们这一篇就围绕这InputReader进行分析研究。  ​ InputReader从名字上来看，就知道InputReader的主要作用就是读取Input事件，这个Input事件包括设备的插拔事件、设备的上报事件。本文档主要就从这两种事件的读取和处理过程进行学习。  InputReade">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://chongyuzhao.github.io/chongyuzhao.github.io/2020/03/26/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%BA%8C)%E4%B9%8BInputReader/InputReader.png">
+<meta property="og:image" content="https://chongyuzhao.github.io/chongyuzhao.github.io/2020/03/26/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%BA%8C)%E4%B9%8BInputReader/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%BA%8C)%E4%B9%8BInputReader%5CInputReader.png">
+<meta property="og:image" content="https://chongyuzhao.github.io/chongyuzhao.github.io/2020/03/26/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%BA%8C)%E4%B9%8BInputReader/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%BA%8C)%E4%B9%8BInputReader%5CgetEvents.jpg">
+<meta property="og:image" content="https://chongyuzhao.github.io/chongyuzhao.github.io/2020/03/26/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%BA%8C)%E4%B9%8BInputReader/getEvents.jpg">
 <meta property="article:published_time" content="2020-03-26T13:25:56.000Z">
-<meta property="article:modified_time" content="2020-03-27T14:02:41.460Z">
+<meta property="article:modified_time" content="2020-03-30T15:27:15.171Z">
 <meta property="article:author" content="chongyuzhao">
 <meta property="article:tag" content="Android">
 <meta property="article:tag" content="Input">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://chongyuzhao.github.io/chongyuzhao.github.io/2020/03/26/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%BA%8C)%E4%B9%8BInputReader/InputReader.png">
   
     <link rel="alternative" href="/atom.xml" title="Alive" type="application/atom+xml">
   
@@ -269,6 +274,49 @@
       
           
         <p>​    从InputFlinger的启动篇我们可以知道，InputReader是InputFlinger的核心之一，我们这一篇就围绕这InputReader进行分析研究。</p>
+<p>​    InputReader从名字上来看，就知道InputReader的主要作用就是读取Input事件，这个Input事件包括设备的插拔事件、设备的上报事件。本文档主要就从这两种事件的读取和处理过程进行学习。</p>
+<h1 id="InputReader的运行"><a href="#InputReader的运行" class="headerlink" title="InputReader的运行"></a>InputReader的运行</h1><img src="/chongyuzhao.github.io/2020/03/26/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%BA%8C)%E4%B9%8BInputReader/InputReader.png" class title="InputReader_loopOnce">
+
+<p><img src="/chongyuzhao.github.io/2020/03/26/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%BA%8C)%E4%B9%8BInputReader/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%BA%8C)%E4%B9%8BInputReader%5CInputReader.png" alt="InputReader"></p>
+<p>​    我们在InputFlinger那一篇文章中有提到过InputReader的创建：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">22</span> <span class="function">sp&lt;InputReaderInterface&gt; <span class="title">createInputReader</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params"><span class="number">23</span>         <span class="keyword">const</span> sp&lt;InputReaderPolicyInterface&gt;&amp; policy,</span></span></span><br><span class="line"><span class="function"><span class="params"><span class="number">24</span>         <span class="keyword">const</span> sp&lt;InputListenerInterface&gt;&amp; listener)</span> </span>&#123;</span><br><span class="line"><span class="number">25</span>     <span class="keyword">return</span> <span class="keyword">new</span> InputReader(<span class="keyword">new</span> EventHub(), policy, listener);</span><br><span class="line"><span class="number">26</span> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>​    InputReader接收3个参数，第一个是EventHub，EventHub-事件中心，也就是InputReader读取事件的核心。第二个是policy，是NativeInputManager的对象，也是与客户端通信的代理。第三个是listener，是InputClassifer的对象。这三个参数在InputReader的运行提供了什么作用，我们继续分析。</p>
+<h2 id="refreshConfigurationLocked"><a href="#refreshConfigurationLocked" class="headerlink" title="refreshConfigurationLocked"></a>refreshConfigurationLocked</h2><p>​    在InputReader构造的过程中，InputReader会先去获取系统的配置(2.refreshConfigurationLocked)：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">557</span> <span class="function"><span class="keyword">void</span> <span class="title">InputReader::refreshConfigurationLocked</span><span class="params">(<span class="keyword">uint32_t</span> changes)</span> </span>&#123;</span><br><span class="line"><span class="number">558</span>     mPolicy-&gt;getReaderConfiguration(&amp;mConfig);</span><br><span class="line"><span class="number">559</span>     mEventHub-&gt;setExcludedDevices(mConfig.excludedDeviceNames);</span><br><span class="line"><span class="number">560</span></span><br><span class="line"><span class="number">561</span>     <span class="keyword">if</span> (changes) &#123;</span><br><span class="line"><span class="number">562</span>         ALOGI(<span class="string">"Reconfiguring input devices.  changes=0x%08x"</span>, changes);</span><br><span class="line"><span class="number">563</span>         <span class="keyword">nsecs_t</span> now = systemTime(SYSTEM_TIME_MONOTONIC);</span><br><span class="line"><span class="number">564</span></span><br><span class="line"><span class="number">565</span>         <span class="keyword">if</span> (changes &amp; InputReaderConfiguration::CHANGE_MUST_REOPEN) &#123;</span><br><span class="line"><span class="number">566</span>             mEventHub-&gt;requestReopenDevices();</span><br><span class="line"><span class="number">567</span>         &#125; <span class="keyword">else</span> &#123;</span><br><span class="line"><span class="number">568</span>             <span class="keyword">for</span> (<span class="keyword">size_t</span> i = <span class="number">0</span>; i &lt; mDevices.<span class="built_in">size</span>(); i++) &#123;</span><br><span class="line"><span class="number">569</span>                 InputDevice* device = mDevices.valueAt(i);</span><br><span class="line"><span class="number">570</span>                 device-&gt;configure(now, &amp;mConfig, changes);</span><br><span class="line"><span class="number">571</span>             &#125;</span><br><span class="line"><span class="number">572</span>         &#125;</span><br><span class="line"><span class="number">573</span>     &#125;</span><br><span class="line"><span class="number">574</span> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>​    changes传进来的值为0，也就是是只执行了两个操作，分别是<code>getReaderConfiguration</code>和<code>setExcludedDevices</code>。这两个操作我们先记一下，后续还会用到。</p>
+<h2 id="loopOnce"><a href="#loopOnce" class="headerlink" title="loopOnce"></a>loopOnce</h2><p>​    InputReader是依赖于InputReaderThread来运行的：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">45</span> <span class="function"><span class="keyword">bool</span> <span class="title">InputReaderThread::threadLoop</span><span class="params">()</span> </span>&#123;</span><br><span class="line"><span class="number">46</span>     mReader-&gt;loopOnce();</span><br><span class="line"><span class="number">47</span>     <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line"><span class="number">48</span> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>​    作为一个子线程，InputReaderThread就是在不断地去运行InputReader的loopOnce。下面就是InputReader一次循环所做的事：</p>
+<p>​        1.如果InputReader的配置发生变化，调用refreshConfigurationLocked去通知所有相关的对象做出处理。</p>
+<p>​        2.调用<code>mEventHub.getEvents</code>去获取事件(6.getEvents)</p>
+<p>​        3.处理获取的事件，包括设备插拔事件和上报事件(7.processEventsLocked)</p>
+<p>​        4.如果Inpt设备发生变化(拔插事件)，那么通过NativeInputManager去通知上层服务(8.notifyInputDevicesChanged)。</p>
+<p>​        5.调用QueuedInputListener的对象去通知注册的监听者，做出相关的处理。</p>
+<p>​    InputReader就是不断地重复这个操作，读取事件，处理事件，通知系统接收处理事件。下面也继续根据这三个步骤去看看InputReader的机理。</p>
+<h1 id="InputReader读取事件"><a href="#InputReader读取事件" class="headerlink" title="InputReader读取事件"></a>InputReader读取事件</h1><p>​    EventHub在构建的时候，会通过inotify机制去监听特定目录下的文件变动(包括文件的创建、删除和内容更新)，然后将这个inotify的fd添加到epoll的监听队列中。并且创建了一个pipe，用在线程间的唤醒：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">245</span> EventHub::EventHub(<span class="keyword">void</span>) :</span><br><span class="line"> <span class="number">246</span>         mBuiltInKeyboardId(NO_BUILT_IN_KEYBOARD), mNextDeviceId(<span class="number">1</span>), mControllerNumbers(),</span><br><span class="line"> <span class="number">247</span>         mOpeningDevices(<span class="literal">nullptr</span>), mClosingDevices(<span class="literal">nullptr</span>),</span><br><span class="line"> <span class="number">248</span>         mNeedToSendFinishedDeviceScan(<span class="literal">false</span>),</span><br><span class="line"> <span class="number">249</span>         mNeedToReopenDevices(<span class="literal">false</span>), mNeedToScanDevices(<span class="literal">true</span>),</span><br><span class="line"> <span class="number">250</span>         mPendingEventCount(<span class="number">0</span>), mPendingEventIndex(<span class="number">0</span>), mPendingINotify(<span class="literal">false</span>) &#123;</span><br><span class="line"> <span class="number">251</span>     acquire_wake_lock(PARTIAL_WAKE_LOCK, WAKE_LOCK_ID);</span><br><span class="line"> <span class="number">252</span></span><br><span class="line"> <span class="number">253</span>     mEpollFd = epoll_create1(EPOLL_CLOEXEC);</span><br><span class="line"> <span class="number">254</span>     LOG_ALWAYS_FATAL_IF(mEpollFd &lt; <span class="number">0</span>, <span class="string">"Could not create epoll instance: %s"</span>, strerror(errno));</span><br><span class="line"> <span class="number">255</span></span><br><span class="line"> <span class="number">256</span>     mINotifyFd = inotify_init();</span><br><span class="line"> <span class="number">257</span>     mInputWd = inotify_add_watch(mINotifyFd, DEVICE_PATH, IN_DELETE | IN_CREATE);</span><br><span class="line"> <span class="number">258</span>     LOG_ALWAYS_FATAL_IF(mInputWd &lt; <span class="number">0</span>, <span class="string">"Could not register INotify for %s: %s"</span>,</span><br><span class="line"> <span class="number">259</span>             DEVICE_PATH, strerror(errno));</span><br><span class="line"> <span class="number">260</span>     <span class="keyword">if</span> (isV4lScanningEnabled()) &#123;</span><br><span class="line"> <span class="number">261</span>         mVideoWd = inotify_add_watch(mINotifyFd, VIDEO_DEVICE_PATH, IN_DELETE | IN_CREATE);</span><br><span class="line"> <span class="number">262</span>         LOG_ALWAYS_FATAL_IF(mVideoWd &lt; <span class="number">0</span>, <span class="string">"Could not register INotify for %s: %s"</span>,</span><br><span class="line"> <span class="number">263</span>                 VIDEO_DEVICE_PATH, strerror(errno));</span><br><span class="line"> <span class="number">264</span>     &#125; <span class="keyword">else</span> &#123;</span><br><span class="line"> <span class="number">265</span>         mVideoWd = <span class="number">-1</span>;</span><br><span class="line"> <span class="number">266</span>         ALOGI(<span class="string">"Video device scanning disabled"</span>);</span><br><span class="line"> <span class="number">267</span>     &#125;</span><br><span class="line"> <span class="number">268</span></span><br><span class="line"> <span class="number">269</span>     <span class="class"><span class="keyword">struct</span> <span class="title">epoll_event</span> <span class="title">eventItem</span>;</span></span><br><span class="line"> <span class="number">270</span>     <span class="built_in">memset</span>(&amp;eventItem, <span class="number">0</span>, <span class="keyword">sizeof</span>(eventItem));</span><br><span class="line"> <span class="number">271</span>     eventItem.events = EPOLLIN;</span><br><span class="line"> <span class="number">272</span>     eventItem.data.fd = mINotifyFd;</span><br><span class="line"> <span class="number">273</span>     <span class="keyword">int</span> result = epoll_ctl(mEpollFd, EPOLL_CTL_ADD, mINotifyFd, &amp;eventItem);</span><br><span class="line"> <span class="number">274</span>     LOG_ALWAYS_FATAL_IF(result != <span class="number">0</span>, <span class="string">"Could not add INotify to epoll instance.  errno=%d"</span>, errno);</span><br><span class="line"> <span class="number">275</span></span><br><span class="line"> <span class="number">276</span>     <span class="keyword">int</span> wakeFds[<span class="number">2</span>];</span><br><span class="line"> <span class="number">277</span>     result = pipe(wakeFds);</span><br><span class="line"> <span class="number">278</span>     LOG_ALWAYS_FATAL_IF(result != <span class="number">0</span>, <span class="string">"Could not create wake pipe.  errno=%d"</span>, errno);</span><br><span class="line"> <span class="number">279</span></span><br><span class="line"> <span class="number">280</span>     mWakeReadPipeFd = wakeFds[<span class="number">0</span>];</span><br><span class="line"> <span class="number">281</span>     mWakeWritePipeFd = wakeFds[<span class="number">1</span>];</span><br><span class="line"> <span class="number">282</span></span><br><span class="line"> <span class="number">283</span>     result = fcntl(mWakeReadPipeFd, F_SETFL, O_NONBLOCK);</span><br><span class="line"> <span class="number">284</span>     LOG_ALWAYS_FATAL_IF(result != <span class="number">0</span>, <span class="string">"Could not make wake read pipe non-blocking.  errno=%d"</span>,</span><br><span class="line"> <span class="number">285</span>             errno);</span><br><span class="line"> <span class="number">286</span></span><br><span class="line"> <span class="number">287</span>     result = fcntl(mWakeWritePipeFd, F_SETFL, O_NONBLOCK);</span><br><span class="line"> <span class="number">288</span>     LOG_ALWAYS_FATAL_IF(result != <span class="number">0</span>, <span class="string">"Could not make wake write pipe non-blocking.  errno=%d"</span>,</span><br><span class="line"> <span class="number">289</span>             errno);</span><br><span class="line"> <span class="number">290</span></span><br><span class="line"> <span class="number">291</span>     eventItem.data.fd = mWakeReadPipeFd;</span><br><span class="line"> <span class="number">292</span>     result = epoll_ctl(mEpollFd, EPOLL_CTL_ADD, mWakeReadPipeFd, &amp;eventItem);</span><br><span class="line"> <span class="number">293</span>     LOG_ALWAYS_FATAL_IF(result != <span class="number">0</span>, <span class="string">"Could not add wake read pipe to epoll instance.  errno=%d"</span>,</span><br><span class="line"> <span class="number">294</span>             errno);</span><br><span class="line"> <span class="number">295</span></span><br><span class="line"> <span class="number">296</span>     <span class="keyword">int</span> major, minor;</span><br><span class="line"> <span class="number">297</span>     getLinuxRelease(&amp;major, &amp;minor);</span><br><span class="line"> <span class="number">298</span>     <span class="comment">// EPOLLWAKEUP was introduced in kernel 3.5</span></span><br><span class="line"> <span class="number">299</span>     mUsingEpollWakeup = major &gt; <span class="number">3</span> || (major == <span class="number">3</span> &amp;&amp; minor &gt;= <span class="number">5</span>);</span><br><span class="line"> <span class="number">300</span> &#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="EventHub-getEvents"><a href="#EventHub-getEvents" class="headerlink" title="EventHub.getEvents"></a>EventHub.getEvents</h2><p>​    EventHub，事件中心，也是系统Input事件的采集器，InputReader就是通过它不断地读取事件。由于<code>getEvents</code>的源码比较长，而且不直观，因此我用以下的思维导图展示<code>getEvents</code>的整个流程：</p>
+<p><img src="/chongyuzhao.github.io/2020/03/26/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%BA%8C)%E4%B9%8BInputReader/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%BA%8C)%E4%B9%8BInputReader%5CgetEvents.jpg" alt="getEvents">    </p>
+<img src="/chongyuzhao.github.io/2020/03/26/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%BA%8C)%E4%B9%8BInputReader/getEvents.jpg" class title="getEvents">
+
+<p>​    在看<code>getEvents的过程前，先说一下几个变量的初始值：</code></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mNeedToReopenDevices = <span class="literal">false</span>;</span><br><span class="line">mNeedToScanDevices = <span class="literal">true</span>;</span><br><span class="line">mNeedToSendFinishedDeviceScan = <span class="literal">false</span>;</span><br><span class="line">mPendingEventIndex = <span class="number">0</span>;</span><br><span class="line">mPendingEventCount = <span class="number">0</span>;</span><br><span class="line">mPendingINotify = <span class="literal">false</span>;</span><br></pre></td></tr></table></figure>
+
+<p>​    为什么要先说一下以上几个变量的初始值呢，因为getEvents的过程就像是一个不断迭代的操作，那么第一次运行的状态如果没有初始值，是无法控制的。</p>
+<p>​    1.<code>mNeedToReopenDevices</code>的值默认是false，只有当InputReader收到<code>CHANGE_MUST_REOPEN</code>的请求后才会被执行：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">557</span> <span class="function"><span class="keyword">void</span> <span class="title">InputReader::refreshConfigurationLocked</span><span class="params">(<span class="keyword">uint32_t</span> changes)</span> </span>&#123;</span><br><span class="line">			……</span><br><span class="line"><span class="number">565</span>         <span class="keyword">if</span> (changes &amp; InputReaderConfiguration::CHANGE_MUST_REOPEN) &#123;</span><br><span class="line"><span class="number">566</span>             mEventHub-&gt;requestReopenDevices();</span><br><span class="line"><span class="number">567</span>         &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		……</span><br><span class="line"><span class="number">572</span>         &#125;</span><br><span class="line"><span class="number">573</span>     &#125;</span><br><span class="line"><span class="number">574</span> &#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>mNeedToReopenDevices</code>为true，那么就会先关闭所有的设备，设置<code>mNeedToScanDevices = true</code>，在后面重新扫描所有的输入设备。<br>    2.当<code>mClosingDevices</code>列表中存在需要关闭的设备，那么就会生成一个<code>DEVICE_REMOVED</code>类型的事件，在<code>processEventLocked</code>去处理，<code>mClosingDevices</code>的值就是从<code>closeDeviceLocked()</code>中设置。</p>
+<p>​    3.<code>mNeedToScanDevices</code>的值为true，那么就会去扫描所有的设备，它的值为true只有两种情况，EventHub初始化的时候和InputReader收到<code>CHANGE_MUST_REOPEN</code>的请求。后者在第一点的时候已经看到了，前者很好理解，当EventHub初始化的时候，可能有些设备注册好了(编辑进内核的驱动会先执行完再启动Android的)，因此在进程启动的前期就需要将这个设备进行处理，否者后面的监听是没有意义的。</p>
+<p>​    4.当<code>mOpeningDevices</code>列表中有需要打开的设备，那么就会封装一个<code>DEVICE_ADDED</code>类型的事件，在`processEventLocked中处理。</p>
+<p>​    5.如果<code>mNeedToSendFinishedDeviceScan == true</code>,那么就会封装一个<code>FINISHED_DEVICE_SCAN</code>类型的事件。</p>
+<p>​    6.后面就是处理我们所读取到的事件了，EventHub刚启动的第一次是没有进行事件的读取的，因此第一次是不会走到这一步中，但后面会阻塞在read调用中，等待事件的发生，这些事件又分为五类：①mINotifyFd，从前面EventHub的构建我们可以知道，这个是监听<code>&quot;/dev/input&quot;</code>目录的变动，包括EPOLLIN(有新的节点创建/删除)和其他的事件(参考epoll的事件类型)。而在这里，只对EPOLLIN类型事件做了处理。②mWakeReadPipeFd，也就是说其他的线程通过mWakeWritePipeFd写东西，作用就是唤醒InputReaderThread，因为InputReaderThread会调用read这个syscall进入阻塞状态，如果一直没有事件发生，会响应不到外界的消息的，如InputReaderConfiguration的变化等。这个节点的作用主要是唤醒，因此没有对它的内容进行处理的。③videoDevice设备的节点，暂时没有对其研究过，后续再研究，但与其他的输入设备事件是类似的，只是对与这类特殊的设备做了特殊的处理而已。④普通输入设备的EPOLLIN类型事件，说明了节点有新的内容，通过read系统调用，如果读取不到内容或者失败，那么设备节点异常，可能已经被移除了，因此关闭设备，否则就应该是输入事件，将输入事件的数据封装成RawEvent对象等待处理。⑤普通输入设备的EPOLLHUP，直接去关闭设备。</p>
+<p>​    7.这步的操作是完成第6点的第①小点未尽之事，当mINotifyFd的EPOLLIN发生，那么就有可能走到这一步，但这个并不一定是立即执行，因为还有一个条件 – <code>mPendingEventIndex &gt;= mPendingEventCount</code>，这是什么意思呢？这个条件只有在前面的while循环中，将上一轮读取到的事件都按部就班处理了之后再处理新的输入设备节点生成的事件。这部分的逻辑在代码中的注释已经写明：<code>readNotify()</code>方法有可能会导致输入设备列表的变动，这个变动主要是设备被移除，但这种情况有可能出现在PendingEvent还没处理完，然后再次getEvents的时候，设备已经被移除，这时如果先处理了设备移除的事件，那么PendingEvents中有该设备未处理完的事件，就会出现异常了(因为InputDevice都被释放了)。因此放在处理完所有的PendingEvents后再处理。</p>
+<p>​    </p>
 
       
       
@@ -327,7 +375,7 @@
         <p><span>本文标题:</span><a href="/chongyuzhao.github.io/2020/03/26/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%BA%8C)%E4%B9%8BInputReader/">Android-Input子系统专题-InputFlinger(二)之InputReader</a></p>
         <p><span>文章作者:</span><a href="/chongyuzhao.github.io/" title="访问 chongyuzhao 的个人博客">chongyuzhao</a></p>
         <p><span>发布时间:</span>2020年03月26日 - 21时25分</p>
-        <p><span>最后更新:</span>2020年03月27日 - 22时02分</p>
+        <p><span>最后更新:</span>2020年03月30日 - 23时27分</p>
         <p>
             <span>原始链接:</span><a class="post-url" href="/chongyuzhao.github.io/2020/03/26/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%BA%8C)%E4%B9%8BInputReader/" title="Android-Input子系统专题-InputFlinger(二)之InputReader">https://chongyuzhao.github.io/2020/03/26/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%BA%8C)%E4%B9%8BInputReader/</a>
             <span class="copy-path" data-clipboard-text="原文: https://chongyuzhao.github.io/2020/03/26/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%BA%8C)%E4%B9%8BInputReader/　　作者: chongyuzhao" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
@@ -356,7 +404,7 @@
 
     <div id="toc" class="toc-article">
     <strong class="toc-title">文章目录</strong>
-    
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#InputReader的运行"><span class="toc-number">1.</span> <span class="toc-text">InputReader的运行</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#refreshConfigurationLocked"><span class="toc-number">1.1.</span> <span class="toc-text">refreshConfigurationLocked</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#loopOnce"><span class="toc-number">1.2.</span> <span class="toc-text">loopOnce</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#InputReader读取事件"><span class="toc-number">2.</span> <span class="toc-text">InputReader读取事件</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#EventHub-getEvents"><span class="toc-number">2.1.</span> <span class="toc-text">EventHub.getEvents</span></a></li></ol></li></ol>
 </div>
 <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
 
@@ -458,6 +506,75 @@
     <script>
         
     </script>
+
+
+<script>
+    function createImgEventFullScreen() {
+        var imgs = $(".article").find("img");
+        console.log(imgs);
+        for (var i = 0; i < imgs.length; i++) {
+            // $(imgs[i]).click(createCover(imgs[i]));
+            imgs[i].onclick = function (e) {
+                var src = e.srcElement.currentSrc;
+                var _this = $(this);
+                console.log(_this);
+                createCover(src,_this);
+            }
+        }
+        function createCover(src,_this) {
+            console.log(_this);
+            console.log(src);
+            var cover = $("<div id='outerDiv'  style='position:fixed;top:0;left:0;background:rgba(0,0,0,0.7);z-index:5;width:100%;height:100%;display:none;'><div id='innerDiv' style='position:absolute;'><img  id='bigImg' style='border:5px solid #fff;' src=''/></div></div>");
+            $("#outerDiv").remove();
+            $("body").append(cover);
+            imgShow("#outerDiv", "#innerDiv", "#bigImg", _this,src);
+
+        }
+    }
+    function imgShow(outerDiv, innerDiv, bigImg, _this,src) {
+        //var src = _this.attr("src"); //获取当前点击的common-img元素中的src属性
+        $(bigImg).attr("src", src); //设置#bigImg元素的src属性
+
+        /*获取当前点击图片的真实大小，并显示弹出层及大图*/
+        $("<img/>").attr("src", src).load(function () {
+            var windowW = $(window).width(); //获取当前窗口宽度
+            var windowH = $(window).height(); //获取当前窗口高度
+            var realWidth = this.width; //获取图片真实宽度
+            var realHeight = this.height; //获取图片真实高度
+            var imgWidth, imgHeight;
+            var scale = 1.2; //缩放尺寸，当图片真实宽度和高度大于窗口宽度和高度时进行缩放
+
+            if (realHeight > windowH * scale) { //判断图片高度
+                imgHeight = windowH * scale; //如大于窗口高度，图片高度进行缩放
+                imgWidth = imgHeight / realHeight * realWidth; //等比例缩放宽度
+                if (imgWidth > windowW * scale) { //如宽度仍大于窗口宽度
+                    imgWidth = windowW * scale; //再对宽度进行缩放
+                }
+            } else if (realWidth > windowW * scale) { //如图片高度合适，判断图片宽度
+                imgWidth = windowW * scale; //如大于窗口宽度，图片宽度进行缩放
+                imgHeight = imgWidth / realWidth * realHeight; //等比例缩放高度
+            } else { //如果图片真实高度和宽度都符合要求，高宽不变
+                imgWidth = realWidth;
+                imgHeight = realHeight;
+            }
+            $(bigImg).css("width", imgWidth); //以最终的宽度对图片缩放
+
+            var w = (windowW - imgWidth) / 2; //计算图片与窗口左边距
+            var h = (windowH - imgHeight) / 2; //计算图片与窗口上边距
+            $(innerDiv).css({ "top": h, "left": w }); //设置#innerDiv的top和left属性
+            //console.log('****')
+            $(outerDiv).fadeIn("fast"); //淡入显示#outerDiv
+        });
+
+        $(outerDiv).click(function () { //再次点击淡出消失弹出层
+            $(this).fadeOut("fast");
+        });
+    }
+    setTimeout(function () {
+        createImgEventFullScreen();
+    }, 1000)
+</script>
+
 </div>
       <footer id="footer">
     <div class="outer">
