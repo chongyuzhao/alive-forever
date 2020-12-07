@@ -6,7 +6,7 @@
   <link href="/chongyuzhao.github.io/atom.xml" rel="self"/>
   
   <link href="https://chongyuzhao.github.io/"/>
-  <updated>2020-07-11T13:41:22.994Z</updated>
+  <updated>2020-12-07T14:24:10.284Z</updated>
   <id>https://chongyuzhao.github.io/</id>
   
   <author>
@@ -17,11 +17,79 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>display-layerstack</title>
+    <link href="https://chongyuzhao.github.io/2020/12/05/display/display-layerstack/"/>
+    <id>https://chongyuzhao.github.io/2020/12/05/display/display-layerstack/</id>
+    <published>2020-12-05T02:00:58.000Z</published>
+    <updated>2020-12-07T14:24:10.284Z</updated>
+    
+    <summary type="html">
+    
+      Display layerStack
+前文背景
+​ 之前有人问在双屏机器下同显时打开开发者选项中的PointerLocation时，主显会正常显示PointerLocationView下的界面以及PointerLocationView，而副显上则没有了底下的界面，只有PointerLocationView.
+​ 通过dumpsys SurfaceFlinger可以看到，display1只有一个图层，因此副显上肯定是只能看到PointerLocationView。通过dumpsys SurfaceFlinger同时可以看到各个display的layer列表以及layerStack，同显(关闭Po
+    
+    </summary>
+    
+    
+    
+      <category term="display input AMS WMS SurfaceFlinger" scheme="https://chongyuzhao.github.io/tags/display-input-AMS-WMS-SurfaceFlinger/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Android-Input子系统专题-InputFlinger(三)之InputDispatcher</title>
+    <link href="https://chongyuzhao.github.io/2020/07/11/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%B8%89)%E4%B9%8BInputDispatcher/"/>
+    <id>https://chongyuzhao.github.io/2020/07/11/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%B8%89)%E4%B9%8BInputDispatcher/</id>
+    <published>2020-07-11T13:51:03.000Z</published>
+    <updated>2020-10-08T03:17:37.749Z</updated>
+    
+    <summary type="html">
+    
+      ​ InputDispatcher是InputFlinger的另一个核心，我们这篇则围绕这个核心来看看InputFlinger是如何分发事件的。
+
+​ 本篇围绕下面3个问题展开：
+
+​ 1.分发事件的来源是哪里。
+
+​ 2.事件分发给谁。
+
+​ 2.使用什么方式分发。
+
+​ 弄清楚这三个问题，那么InputDispatcher也就弄明白了。
+
+InputDispatcher的运行
+​ InputDispatcher与InputReader一样，在InputFlinger这个服务启动时就创建的一个线程，我们从线程的loop方法开看它的整体运行过程：
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+1
+    
+    </summary>
+    
+    
+    
+      <category term="Android" scheme="https://chongyuzhao.github.io/tags/Android/"/>
+    
+      <category term="input" scheme="https://chongyuzhao.github.io/tags/input/"/>
+    
+  </entry>
+  
+  <entry>
     <title>Android-Input子系统专题-InputFlinger(二)之InputReader</title>
     <link href="https://chongyuzhao.github.io/2020/03/26/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%BA%8C)%E4%B9%8BInputReader/"/>
     <id>https://chongyuzhao.github.io/2020/03/26/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%BA%8C)%E4%B9%8BInputReader/</id>
     <published>2020-03-26T13:25:56.000Z</published>
-    <updated>2020-07-11T13:41:22.994Z</updated>
+    <updated>2020-10-01T14:53:01.973Z</updated>
     
     <summary type="html">
     
@@ -41,7 +109,7 @@ InputReader的运行
 5
 
 
-22 sp&lt;InputReaderInterface&gt; createInp
+22 sp&lt;InputReaderInterface&gt; createInp&lt;/InputReaderInterface&gt;
     
     </summary>
     

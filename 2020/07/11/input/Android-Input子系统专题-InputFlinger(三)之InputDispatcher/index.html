@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Android-Input子系统专题-InputFlinger(三)之InputDispatcher | Alive</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="​ InputDispatcher是InputFlinger的另一个核心，我们这篇则围绕这个核心来看看InputFlinger是如何分发事件的。  ​ 本篇围绕下面3个问题展开：  ​ 1.分发事件的来源是哪里。  ​ 2.事件分发给谁。  ​ 2.使用什么方式分发。  ​ 弄清楚这三个问题，那么InputDispatcher也就弄明白了。  InputDispatcher的运行 ​ InputD">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android-Input子系统专题-InputFlinger(三)之InputDispatcher">
+<meta property="og:url" content="https://chongyuzhao.github.io/2020/07/11/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%B8%89)%E4%B9%8BInputDispatcher/index.html">
+<meta property="og:site_name" content="Alive">
+<meta property="og:description" content="​ InputDispatcher是InputFlinger的另一个核心，我们这篇则围绕这个核心来看看InputFlinger是如何分发事件的。  ​ 本篇围绕下面3个问题展开：  ​ 1.分发事件的来源是哪里。  ​ 2.事件分发给谁。  ​ 2.使用什么方式分发。  ​ 弄清楚这三个问题，那么InputDispatcher也就弄明白了。  InputDispatcher的运行 ​ InputD">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://chongyuzhao.github.io/chongyuzhao.github.io/2020/07/11/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%B8%89)%E4%B9%8BInputDispatcher/notifyKey.png">
+<meta property="og:image" content="https://chongyuzhao.github.io/chongyuzhao.github.io/2020/07/11/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%B8%89)%E4%B9%8BInputDispatcher/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%B8%89)%E4%B9%8BInputDispatcher%5CnotifyKey.png">
+<meta property="article:published_time" content="2020-07-11T13:51:03.000Z">
+<meta property="article:modified_time" content="2020-10-08T03:17:37.749Z">
+<meta property="article:author" content="chongyuzhao">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="input">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://chongyuzhao.github.io/chongyuzhao.github.io/2020/07/11/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%B8%89)%E4%B9%8BInputDispatcher/notifyKey.png">
+  
+    <link rel="alternative" href="/atom.xml" title="Alive" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/chongyuzhao.github.io/img/favicon.jpg">
+  
+  
+      
+<link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+
+  
+  
+<link rel="stylesheet" href="/chongyuzhao.github.io/css/style.css">
+
+  <link rel="stylesheet" href="/chongyuzhao.github.io/font-awesome/css/font-awesome.min.css">
+  <link rel="apple-touch-icon" href="/chongyuzhao.github.io/apple-touch-icon.png">
+  
+  
+      <link rel="stylesheet" href="/chongyuzhao.github.io/fancybox/jquery.fancybox.css">
+  
+  <!-- 加载特效 -->
+    <script src="/chongyuzhao.github.io/js/pace.js"></script>
+    <link href="/chongyuzhao.github.io/css/pace/pace-theme-flash.css" rel="stylesheet" />
+  <script>
+      var yiliaConfig = {
+          rootUrl: '/chongyuzhao.github.io/',
+          fancybox: true,
+          animate: true,
+          isHome: false,
+          isPost: true,
+          isArchive: false,
+          isTag: false,
+          isCategory: false,
+          open_in_new: false
+      }
+  </script>
+<meta name="generator" content="Hexo 4.2.0"></head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/chongyuzhao.github.io/" class="profilepic">
+            
+            <img lazy-src="/chongyuzhao.github.io/img/head.jpg" class="js-avatar">
+            
+        </a>
+
+        <hgroup>
+          <h1 class="header-author"><a href="/chongyuzhao.github.io/" title="Hi Mate">chongyuzhao</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">just forever</p>
+        
+        
+            <form>
+                <input type="text" class="st-default-search-input search" id="search" placeholder=" Search...">
+            </form>
+        
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/chongyuzhao.github.io/Home">博客首页</a></li>
+                        
+                            <li><a href="/chongyuzhao.github.io/works">作品展示</a></li>
+                        
+                            <li><a href="/chongyuzhao.github.io/about">留言打卡</a></li>
+                        
+                            <li><a href="/chongyuzhao.github.io/FrontEndGuide">前端导航</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fl mail" target="_blank" href="/chongyuzhao.github.io/chongyu_Zhao@163.com" title="mail">mail</a>
+                            
+                                <a class="fl github" target="_blank" href="https://github.com/chongyuzhao" title="github">github</a>
+                            
+                                <a class="fl zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
+                            
+                                <a class="fl weibo" target="_blank" href="#" title="weibo">weibo</a>
+                            
+                                <a class="fl google" target="_blank" href="#" title="google">google</a>
+                            
+                                <a class="fl twitter" target="_blank" href="#" title="twitter">twitter</a>
+                            
+                                <a class="fl linkedin" target="_blank" href="#" title="linkedin">linkedin</a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <a href="/chongyuzhao.github.io/tags/AMS/" style="font-size: 13.33px;">AMS</a> <a href="/chongyuzhao.github.io/tags/Android/" style="font-size: 20px;">Android</a> <a href="/chongyuzhao.github.io/tags/AndroidQ/" style="font-size: 10px;">AndroidQ</a> <a href="/chongyuzhao.github.io/tags/Input/" style="font-size: 16.67px;">Input</a> <a href="/chongyuzhao.github.io/tags/WMS/" style="font-size: 10px;">WMS</a> <a href="/chongyuzhao.github.io/tags/display-input-AMS-WMS-SurfaceFlinger/" style="font-size: 10px;">display input AMS WMS SurfaceFlinger</a> <a href="/chongyuzhao.github.io/tags/input/" style="font-size: 13.33px;">input</a>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a target="_blank" class="main-nav-link switch-friends-link" href="http://chongyuzhao.github.io/">name</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/chongyuzhao.github.io/" title="Me">chongyuzhao</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/chongyuzhao.github.io/" class="profilepic">
+                
+                    <img lazy-src="/chongyuzhao.github.io/img/head.jpg" class="js-avatar">
+                
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/chongyuzhao.github.io/" title="Me">chongyuzhao</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">just forever</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/chongyuzhao.github.io/Home">博客首页</a></li>
+                
+                    <li><a href="/chongyuzhao.github.io/works">作品展示</a></li>
+                
+                    <li><a href="/chongyuzhao.github.io/about">留言打卡</a></li>
+                
+                    <li><a href="/chongyuzhao.github.io/FrontEndGuide">前端导航</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a class="mail" target="_blank" href="/chongyuzhao.github.io/chongyu_Zhao@163.com" title="mail">mail</a>
+                    
+                        <a class="github" target="_blank" href="https://github.com/chongyuzhao" title="github">github</a>
+                    
+                        <a class="zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
+                    
+                        <a class="weibo" target="_blank" href="#" title="weibo">weibo</a>
+                    
+                        <a class="google" target="_blank" href="#" title="google">google</a>
+                    
+                        <a class="twitter" target="_blank" href="#" title="twitter">twitter</a>
+                    
+                        <a class="linkedin" target="_blank" href="#" title="linkedin">linkedin</a>
+                    
+                </div>
+            </nav>
+        </header>                
+    </div>
+</nav>
+      <div class="body-wrap"><article id="post-input/Android-Input子系统专题-InputFlinger(三)之InputDispatcher" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/chongyuzhao.github.io/2020/07/11/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%B8%89)%E4%B9%8BInputDispatcher/" class="article-date">
+      <time datetime="2020-07-11T13:51:03.000Z" itemprop="datePublished">2020-07-11</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Android-Input子系统专题-InputFlinger(三)之InputDispatcher
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/chongyuzhao.github.io/tags/Android/" rel="tag">Android</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/chongyuzhao.github.io/tags/input/" rel="tag">input</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <p>​    InputDispatcher是InputFlinger的另一个核心，我们这篇则围绕这个核心来看看InputFlinger是如何分发事件的。</p>
+<p>​    本篇围绕下面3个问题展开：</p>
+<p>​        1.分发事件的来源是哪里。</p>
+<p>​        2.事件分发给谁。</p>
+<p>​        2.使用什么方式分发。</p>
+<p>​    弄清楚这三个问题，那么InputDispatcher也就弄明白了。</p>
+<h1 id="InputDispatcher的运行"><a href="#InputDispatcher的运行" class="headerlink" title="InputDispatcher的运行"></a>InputDispatcher的运行</h1><p>​    InputDispatcher与InputReader一样，在InputFlinger这个服务启动时就创建的一个线程，我们从线程的loop方法开看它的整体运行过程：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// frameworks/native/services/inputflinger/InputDispatcher.cpp</span></span><br><span class="line"> <span class="number">295</span> <span class="function"><span class="keyword">void</span> <span class="title">InputDispatcher::dispatchOnce</span><span class="params">()</span> </span>&#123;</span><br><span class="line"> <span class="number">296</span>     <span class="keyword">nsecs_t</span> nextWakeupTime = LONG_LONG_MAX;</span><br><span class="line"> <span class="number">297</span>     &#123; <span class="comment">// acquire lock</span></span><br><span class="line"> <span class="number">298</span>         <span class="built_in">std</span>::scoped_lock _l(mLock);</span><br><span class="line"> <span class="number">299</span>         mDispatcherIsAlive.notify_all();</span><br><span class="line"> <span class="number">300</span></span><br><span class="line"> <span class="number">301</span>         <span class="comment">// Run a dispatch loop if there are no pending commands.</span></span><br><span class="line"> <span class="number">302</span>         <span class="comment">// The dispatch loop might enqueue commands to run afterwards.</span></span><br><span class="line"> <span class="number">303</span>         <span class="keyword">if</span> (!haveCommandsLocked()) &#123;</span><br><span class="line"> <span class="number">304</span>             dispatchOnceInnerLocked(&amp;nextWakeupTime);</span><br><span class="line"> <span class="number">305</span>         &#125;</span><br><span class="line"> <span class="number">306</span></span><br><span class="line"> <span class="number">307</span>         <span class="comment">// Run all pending commands if there are any.</span></span><br><span class="line"> <span class="number">308</span>         <span class="comment">// If any commands were run then force the next poll to wake up immediately.</span></span><br><span class="line"> <span class="number">309</span>         <span class="keyword">if</span> (runCommandsLockedInterruptible()) &#123;</span><br><span class="line"> <span class="number">310</span>             nextWakeupTime = LONG_LONG_MIN;</span><br><span class="line"> <span class="number">311</span>         &#125;</span><br><span class="line"> <span class="number">312</span>     &#125; <span class="comment">// release lock</span></span><br><span class="line"> <span class="number">313</span></span><br><span class="line"> <span class="number">314</span>     <span class="comment">// Wait for callback or timeout or wake.  (make sure we round up, not down)</span></span><br><span class="line"> <span class="number">315</span>     <span class="keyword">nsecs_t</span> currentTime = now();</span><br><span class="line"> <span class="number">316</span>     <span class="keyword">int</span> timeoutMillis = toMillisecondTimeoutDelay(currentTime, nextWakeupTime);</span><br><span class="line"> <span class="number">317</span>     mLooper-&gt;pollOnce(timeoutMillis);</span><br><span class="line"> <span class="number">318</span> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>​    局部变量nextWakeupTime是下一次等待的时间。haveCommandsLocked是判断命令队列是否为空。dispatchOnceInnerLocked是分发一次事件的方法。runCommandsLockedInterruptible是执行一次command。最后调用Looper::pollOnce等待新的唤醒或者如果nextWakeupTime小于0会立即进入下一次loop。InputDispatcher的looper中主要就是处理命令和事件分发。</p>
+<h2 id="command的enqueue和run"><a href="#command的enqueue和run" class="headerlink" title="command的enqueue和run"></a>command的enqueue和run</h2><p>​    InputDispatcher的command是由mCommandQueue来管理，haveCommandsLocked则判断mCommandQueue是否为空，如果非空，那么就优先处理command。command是通过postCommandLocked来进行enqueue的：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">645</span>     <span class="function"><span class="keyword">typedef</span> <span class="title">void</span> <span class="params">(InputDispatcher::*Command)</span><span class="params">(CommandEntry* commandEntry)</span></span>;</span><br><span class="line"><span class="number">714</span> <span class="function">InputDispatcher::CommandEntry* <span class="title">InputDispatcher::postCommandLocked</span><span class="params">(Command command)</span> </span>&#123;</span><br><span class="line"><span class="number">715</span>     CommandEntry* commandEntry = <span class="keyword">new</span> CommandEntry(command);</span><br><span class="line"><span class="number">716</span>     mCommandQueue.enqueueAtTail(commandEntry);</span><br><span class="line"><span class="number">717</span>     <span class="keyword">return</span> commandEntry;</span><br><span class="line"><span class="number">718</span> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>​    Command类型是一个只有一个CommandEntry*参数，返回值为void的函数指针，然后将函数指针封装成CommandEntry：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">648</span>     <span class="class"><span class="keyword">struct</span> <span class="title">CommandEntry</span> :</span> Link&lt;CommandEntry&gt; &#123;</span><br><span class="line"><span class="number">649</span>         <span class="function"><span class="keyword">explicit</span> <span class="title">CommandEntry</span><span class="params">(Command command)</span></span>;</span><br><span class="line"><span class="number">650</span>         ~CommandEntry();</span><br><span class="line"><span class="number">651</span></span><br><span class="line"><span class="number">652</span>         Command command;</span><br><span class="line"><span class="number">653</span></span><br><span class="line"><span class="number">654</span>         <span class="comment">// parameters for the command (usage varies by command)</span></span><br><span class="line"><span class="number">655</span>         sp&lt;Connection&gt; connection;</span><br><span class="line"><span class="number">656</span>         <span class="keyword">nsecs_t</span> eventTime;</span><br><span class="line"><span class="number">657</span>         KeyEntry* keyEntry;</span><br><span class="line"><span class="number">658</span>         sp&lt;InputApplicationHandle&gt; inputApplicationHandle;</span><br><span class="line"><span class="number">659</span>         <span class="built_in">std</span>::<span class="built_in">string</span> reason;</span><br><span class="line"><span class="number">660</span>         <span class="keyword">int32_t</span> userActivityEventType;</span><br><span class="line"><span class="number">661</span>         <span class="keyword">uint32_t</span> seq;</span><br><span class="line"><span class="number">662</span>         <span class="keyword">bool</span> handled;</span><br><span class="line"><span class="number">663</span>         sp&lt;InputChannel&gt; inputChannel;</span><br><span class="line"><span class="number">664</span>         sp&lt;IBinder&gt; oldToken;</span><br><span class="line"><span class="number">665</span>         sp&lt;IBinder&gt; newToken;</span><br><span class="line"><span class="number">666</span>     &#125;;</span><br></pre></td></tr></table></figure>
+
+<p>​    postCommandLocked返回的是CommandEntry的指针，而这个函数的传参只有Command这个参数，也就是说调用处需要自己填充CommandEntry，不同的命令传递不同的参数，如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">4087</span> <span class="function"><span class="keyword">void</span> <span class="title">InputDispatcher::onFocusChangedLocked</span><span class="params">(<span class="keyword">const</span> sp&lt;InputWindowHandle&gt;&amp; oldFocus,</span></span></span><br><span class="line"><span class="function"><span class="params"><span class="number">4088</span>         <span class="keyword">const</span> sp&lt;InputWindowHandle&gt;&amp; newFocus)</span> </span>&#123;</span><br><span class="line"><span class="number">4089</span>     sp&lt;IBinder&gt; oldToken = oldFocus != <span class="literal">nullptr</span> ? oldFocus-&gt;getToken() : <span class="literal">nullptr</span>;</span><br><span class="line"><span class="number">4090</span>     sp&lt;IBinder&gt; newToken = newFocus != <span class="literal">nullptr</span> ? newFocus-&gt;getToken() : <span class="literal">nullptr</span>;</span><br><span class="line"><span class="number">4091</span>     CommandEntry* commandEntry = postCommandLocked(</span><br><span class="line"><span class="number">4092</span>             &amp; InputDispatcher::doNotifyFocusChangedLockedInterruptible);</span><br><span class="line"><span class="number">4093</span>     commandEntry-&gt;oldToken = oldToken;</span><br><span class="line"><span class="number">4094</span>     commandEntry-&gt;newToken = newToken;</span><br><span class="line"><span class="number">4095</span> &#125;</span><br><span class="line"><span class="number">4067</span> <span class="function"><span class="keyword">void</span> <span class="title">InputDispatcher::onDispatchCycleFinishedLocked</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params"><span class="number">4068</span>         <span class="keyword">nsecs_t</span> currentTime, <span class="keyword">const</span> sp&lt;Connection&gt;&amp; connection, <span class="keyword">uint32_t</span> seq, <span class="keyword">bool</span> handled)</span> </span>&#123;</span><br><span class="line"><span class="number">4069</span>     CommandEntry* commandEntry = postCommandLocked(</span><br><span class="line"><span class="number">4070</span>             &amp; InputDispatcher::doDispatchCycleFinishedLockedInterruptible);</span><br><span class="line"><span class="number">4071</span>     commandEntry-&gt;connection = connection;</span><br><span class="line"><span class="number">4072</span>     commandEntry-&gt;eventTime = currentTime;</span><br><span class="line"><span class="number">4073</span>     commandEntry-&gt;seq = seq;</span><br><span class="line"><span class="number">4074</span>     commandEntry-&gt;handled = handled;</span><br><span class="line"><span class="number">4075</span> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>​    FocusWindow发生变化时，会enqueue一个doNotifyFocusChangedLockedInterruptible的命令，传递的参数就是新旧FocusWindow的token。而当事件分发结束后就会enqueue一个doDispatchCycleFinishedLockedInterruptible命令，传递这个事件对应的seq、finish事件、handled(是否被处理)和事件分发的对应connection。</p>
+<h2 id="Event的接收与分发"><a href="#Event的接收与分发" class="headerlink" title="Event的接收与分发"></a>Event的接收与分发</h2><p>​    InputDispatcher的主要作用并不是处理command，而是分发事件。InputDispatcher处理Event实际上是分了两部，第一个是接收InputReader组织好的Event，第二就是将这些Event分发给对应的接收者。</p>
+<h3 id="Event的接收"><a href="#Event的接收" class="headerlink" title="Event的接收"></a>Event的接收</h3><p>​    我们先来看一下dispatchOnceInnerLocked从mInboundQueue队列中取出事件，mInboundQueue的enqueue操作只在enqueueInboundEventLocked方法中调用，也就是所有的enqueue事件的操作都是经过enqueueInboundEventLocked这个方法，在InputFlinger中搜索enqueueInboundEventLocked，可以看到只有5处地方：</p>
+<p>​    1.notifyConfigurationChanged</p>
+<p>​    2.notifyKey，KeyEvent上报。</p>
+<p>​    3.notifyMotion，MotionEvent上报。</p>
+<p>​    4.notifyDeviceReset</p>
+<p>​    5.injectInputEvent，测试/input命令注射的Event通路。</p>
+<p>​    我们以简单的notifyKey这条通路看一下是如何从InputReader enqueue事件的：</p>
+<img src="/chongyuzhao.github.io/2020/07/11/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%B8%89)%E4%B9%8BInputDispatcher/notifyKey.png" class title="notifyKey">
+
+<p><img src="/chongyuzhao.github.io/2020/07/11/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%B8%89)%E4%B9%8BInputDispatcher/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%B8%89)%E4%B9%8BInputDispatcher%5CnotifyKey.png" alt="notifyKey"></p>
+<p>​    上图就是InputReader往InputDispatcher enqueue事件的通路，这算是对InputReader部分知识的补充。从上图可以看到，InputReader从设备节点中读取到事件后，经过InputDevice对应InputMapper(在这里就是KeyboardInputMapper)的处理后，通过调用notifyKey(触摸/鼠标等则调用notifyMotion)接口将Event封装成NotifyArgs的子类push到InputListener的mArgsQueue中。等到InputReader处理完一次loopOnce时，通过调用InputListener.flush将mArgsQueue中所有的事件enqueue到InputDispatcher中。</p>
+<p>​    为什么要怎么做呢？我认为主要的原因是：高度模块化，InputReader与InputDispatcher是两个不同功能的模块，从bp文件中也可以看到，InputReader、InputDispatcher和InputListener分别是3个动态库的核心文件，这三者职责单一，耦合度低，便于维护和开发。</p>
+<p>​    Event的接收过程还是比较简单的，下面我们关注一下几个小细节。</p>
+<h4 id="InputDispatcher线程的wake"><a href="#InputDispatcher线程的wake" class="headerlink" title="InputDispatcher线程的wake"></a>InputDispatcher线程的wake</h4><p>​    在InputDispatcher的dispatchOnce方法中，方法的结束时调用了Looper的pollOnce方法，传递了一个next唤醒的timeout时间，最大值为LONG_LONG_MAX，也就是无限等待。那么当timeout为LONG_LONG_MAX时，当然也不是真正的无限休眠了，当接收到事件后也会去唤醒InputDispatcher线程:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">2676</span> <span class="function"><span class="keyword">void</span> <span class="title">InputDispatcher::notifyKey</span><span class="params">(<span class="keyword">const</span> NotifyKeyArgs* args)</span> </span>&#123;</span><br><span class="line">		……</span><br><span class="line"><span class="number">2720</span>     <span class="keyword">bool</span> needWake;</span><br><span class="line"><span class="number">2721</span>     &#123; <span class="comment">// acquire lock</span></span><br><span class="line"><span class="number">2722</span>         mLock.lock();</span><br><span class="line">		……</span><br><span class="line"><span class="number">2740</span>         needWake = enqueueInboundEventLocked(newEntry);</span><br><span class="line"><span class="number">2741</span>         mLock.unlock();</span><br><span class="line"><span class="number">2742</span>     &#125; <span class="comment">// release lock</span></span><br><span class="line"><span class="number">2743</span></span><br><span class="line"><span class="number">2744</span>     <span class="keyword">if</span> (needWake) &#123;</span><br><span class="line"><span class="number">2745</span>         mLooper-&gt;wake();</span><br><span class="line"><span class="number">2746</span>     &#125;</span><br><span class="line"><span class="number">2747</span> &#125;</span><br><span class="line"><span class="number">2753</span> <span class="function"><span class="keyword">void</span> <span class="title">InputDispatcher::notifyMotion</span><span class="params">(<span class="keyword">const</span> NotifyMotionArgs* args)</span> </span>&#123;</span><br><span class="line"><span class="number">2795</span>     <span class="keyword">bool</span> needWake;</span><br><span class="line"><span class="number">2796</span>     &#123; <span class="comment">// acquire lock</span></span><br><span class="line"><span class="number">2797</span>         mLock.lock();</span><br><span class="line">		……</span><br><span class="line"><span class="number">2826</span>         needWake = enqueueInboundEventLocked(newEntry);</span><br><span class="line"><span class="number">2827</span>         mLock.unlock();</span><br><span class="line"><span class="number">2828</span>     &#125; <span class="comment">// release lock</span></span><br><span class="line"><span class="number">2829</span></span><br><span class="line"><span class="number">2830</span>     <span class="keyword">if</span> (needWake) &#123;</span><br><span class="line"><span class="number">2831</span>         mLooper-&gt;wake();</span><br><span class="line"><span class="number">2832</span>     &#125;</span><br><span class="line"><span class="number">2833</span> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>​    如代码所示，执行enqueueInboundEventLocked后如果返回true，则调用Looper的wake方法唤醒等待。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">473</span> <span class="function"><span class="keyword">bool</span> <span class="title">InputDispatcher::enqueueInboundEventLocked</span><span class="params">(EventEntry* entry)</span> </span>&#123;</span><br><span class="line"><span class="number">474</span>     <span class="keyword">bool</span> needWake = mInboundQueue.isEmpty();</span><br><span class="line"><span class="number">475</span>     mInboundQueue.enqueueAtTail(entry);</span><br><span class="line"><span class="number">476</span>     traceInboundQueueLengthLocked();</span><br><span class="line"><span class="number">477</span></span><br><span class="line"><span class="number">478</span>     <span class="keyword">switch</span> (entry-&gt;type) &#123;</span><br><span class="line"><span class="number">479</span>     <span class="keyword">case</span> EventEntry::TYPE_KEY: &#123;</span><br><span class="line"><span class="number">480</span>         <span class="comment">// Optimize app switch latency.</span></span><br><span class="line"><span class="number">481</span>         <span class="comment">// If the application takes too long to catch up then we drop all events preceding</span></span><br><span class="line"><span class="number">482</span>         <span class="comment">// the app switch key.</span></span><br><span class="line"><span class="number">483</span>         KeyEntry* keyEntry = <span class="keyword">static_cast</span>&lt;KeyEntry*&gt;(entry);</span><br><span class="line"><span class="number">484</span>         <span class="keyword">if</span> (isAppSwitchKeyEvent(keyEntry)) &#123;</span><br><span class="line"><span class="number">485</span>             <span class="keyword">if</span> (keyEntry-&gt;action == AKEY_EVENT_ACTION_DOWN) &#123;</span><br><span class="line"><span class="number">486</span>                 mAppSwitchSawKeyDown = <span class="literal">true</span>;</span><br><span class="line"><span class="number">487</span>             &#125; <span class="keyword">else</span> <span class="keyword">if</span> (keyEntry-&gt;action == AKEY_EVENT_ACTION_UP) &#123;</span><br><span class="line"><span class="number">488</span>                 <span class="keyword">if</span> (mAppSwitchSawKeyDown) &#123;</span><br><span class="line"><span class="number">489</span> #<span class="keyword">if</span> DEBUG_APP_SWITCH</span><br><span class="line"><span class="number">490</span>                     ALOGD(<span class="string">"App switch is pending!"</span>);</span><br><span class="line"><span class="number">491</span> <span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"><span class="number">492</span>                     mAppSwitchDueTime = keyEntry-&gt;eventTime + APP_SWITCH_TIMEOUT;</span><br><span class="line"><span class="number">493</span>                     mAppSwitchSawKeyDown = <span class="literal">false</span>;</span><br><span class="line"><span class="number">494</span>                     needWake = <span class="literal">true</span>;</span><br><span class="line"><span class="number">495</span>                 &#125;</span><br><span class="line"><span class="number">496</span>             &#125;</span><br><span class="line"><span class="number">497</span>         &#125;</span><br><span class="line"><span class="number">498</span>         <span class="keyword">break</span>;</span><br><span class="line"><span class="number">499</span>     &#125;</span><br><span class="line"><span class="number">500</span></span><br><span class="line"><span class="number">501</span>     <span class="keyword">case</span> EventEntry::TYPE_MOTION: &#123;</span><br><span class="line"><span class="number">502</span>         <span class="comment">// Optimize case where the current application is unresponsive and the user</span></span><br><span class="line"><span class="number">503</span>         <span class="comment">// decides to touch a window in a different application.</span></span><br><span class="line"><span class="number">504</span>         <span class="comment">// If the application takes too long to catch up then we drop all events preceding</span></span><br><span class="line"><span class="number">505</span>         <span class="comment">// the touch into the other window.</span></span><br><span class="line"><span class="number">506</span>         MotionEntry* motionEntry = <span class="keyword">static_cast</span>&lt;MotionEntry*&gt;(entry);</span><br><span class="line"><span class="number">507</span>         <span class="keyword">if</span> (motionEntry-&gt;action == AMOTION_EVENT_ACTION_DOWN</span><br><span class="line"><span class="number">508</span>                 &amp;&amp; (motionEntry-&gt;source &amp; AINPUT_SOURCE_CLASS_POINTER)</span><br><span class="line"><span class="number">509</span>                 &amp;&amp; mInputTargetWaitCause == INPUT_TARGET_WAIT_CAUSE_APPLICATION_NOT_READY</span><br><span class="line"><span class="number">510</span>                 &amp;&amp; mInputTargetWaitApplicationToken != <span class="literal">nullptr</span>) &#123;</span><br><span class="line"><span class="number">511</span>             <span class="keyword">int32_t</span> displayId = motionEntry-&gt;displayId;</span><br><span class="line"><span class="number">512</span>             <span class="keyword">int32_t</span> x = <span class="keyword">int32_t</span>(motionEntry-&gt;pointerCoords[<span class="number">0</span>].</span><br><span class="line"><span class="number">513</span>                     getAxisValue(AMOTION_EVENT_AXIS_X));</span><br><span class="line"><span class="number">514</span>             <span class="keyword">int32_t</span> y = <span class="keyword">int32_t</span>(motionEntry-&gt;pointerCoords[<span class="number">0</span>].</span><br><span class="line"><span class="number">515</span>                     getAxisValue(AMOTION_EVENT_AXIS_Y));</span><br><span class="line"><span class="number">516</span>             sp&lt;InputWindowHandle&gt; touchedWindowHandle = findTouchedWindowAtLocked(displayId, x, y);</span><br><span class="line"><span class="number">517</span>             <span class="keyword">if</span> (touchedWindowHandle != <span class="literal">nullptr</span></span><br><span class="line"><span class="number">518</span>                     &amp;&amp; touchedWindowHandle-&gt;getApplicationToken()</span><br><span class="line"><span class="number">519</span>                             != mInputTargetWaitApplicationToken) &#123;</span><br><span class="line"><span class="number">520</span>                 <span class="comment">// User touched a different application than the one we are waiting on.</span></span><br><span class="line"><span class="number">521</span>                 <span class="comment">// Flag the event, and start pruning the input queue.</span></span><br><span class="line"><span class="number">522</span>                 mNextUnblockedEvent = motionEntry;</span><br><span class="line"><span class="number">523</span>                 needWake = <span class="literal">true</span>;</span><br><span class="line"><span class="number">524</span>             &#125;</span><br><span class="line"><span class="number">525</span>         &#125;</span><br><span class="line"><span class="number">526</span>         <span class="keyword">break</span>;</span><br><span class="line"><span class="number">527</span>     &#125;</span><br><span class="line"><span class="number">528</span>     &#125;</span><br><span class="line"><span class="number">529</span></span><br><span class="line"><span class="number">530</span>     <span class="keyword">return</span> needWake;</span><br><span class="line"><span class="number">531</span> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>​    enqueueInboundEventLocked方法不仅仅将event equeue到InputDispatcher的mInboundQueue队列中，如果mInboundQueue中原本是NULL，那么线程可能在wait了，因此返回值必然为true，而KeyEvent和MotionEvent则分别做一些判断：</p>
+<p>​    KeyEvent，如果是home、endcall和app_switch三种按键且是UP事件，那么就要唤醒(理由是？)。</p>
+<p>​    MotionEvent，如果当前焦点窗口暂未准备好处理事件且对应的Application token不是NULL，然后主触摸点所在的位置不是等待的窗口区域，则唤醒。</p>
+<h3 id="Event的分发"><a href="#Event的分发" class="headerlink" title="Event的分发"></a>Event的分发</h3><p>​    InputDispatcher从名字上来看，就知道其主要功能就是分发事件。下面我们专门看以下InputDispatcher是如何将事件分发到对应的应用中。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">320</span> <span class="function"><span class="keyword">void</span> <span class="title">InputDispatcher::dispatchOnceInnerLocked</span><span class="params">(<span class="keyword">nsecs_t</span>* nextWakeupTime)</span> </span>&#123;</span><br><span class="line"><span class="number">321</span>     <span class="keyword">nsecs_t</span> currentTime = now();</span><br><span class="line">    		……</span><br><span class="line"><span class="number">346</span>     <span class="comment">// Ready to start a new event.</span></span><br><span class="line"><span class="number">347</span>     <span class="comment">// If we don't already have a pending event, go grab one.</span></span><br><span class="line"><span class="number">348</span>     <span class="keyword">if</span> (! mPendingEvent) &#123;</span><br><span class="line"><span class="number">349</span>         <span class="keyword">if</span> (mInboundQueue.isEmpty()) &#123;</span><br><span class="line"><span class="number">350</span>             <span class="keyword">if</span> (isAppSwitchDue) &#123;</span><br><span class="line"><span class="number">351</span>                 <span class="comment">// The inbound queue is empty so the app switch key we were waiting</span></span><br><span class="line"><span class="number">352</span>                 <span class="comment">// for will never arrive.  Stop waiting for it.</span></span><br><span class="line"><span class="number">353</span>                 resetPendingAppSwitchLocked(<span class="literal">false</span>);</span><br><span class="line"><span class="number">354</span>                 isAppSwitchDue = <span class="literal">false</span>;</span><br><span class="line"><span class="number">355</span>             &#125;</span><br><span class="line"><span class="number">356</span></span><br><span class="line"><span class="number">357</span>             <span class="comment">// Synthesize a key repeat if appropriate.</span></span><br><span class="line"><span class="number">358</span>             <span class="keyword">if</span> (mKeyRepeatState.lastKeyEntry) &#123;</span><br><span class="line"><span class="number">359</span>                 <span class="keyword">if</span> (currentTime &gt;= mKeyRepeatState.nextRepemAppSwitchSawKeyDownatTime) &#123;</span><br><span class="line"><span class="number">360</span>                     mPendingEvent = synthesizeKeyRepeatLocked(currentTime);</span><br><span class="line"><span class="number">361</span>                 &#125; <span class="keyword">else</span> &#123;</span><br><span class="line"><span class="number">362</span>                     <span class="keyword">if</span> (mKeyRepeatState.nextRepeatTime &lt; *nextWakeupTime) &#123;</span><br><span class="line"><span class="number">363</span>                         *nextWakeupTime = mKeyRepeatState.nextRepeatTime;</span><br><span class="line"><span class="number">364</span>                     &#125;</span><br><span class="line"><span class="number">365</span>                 &#125;</span><br><span class="line"><span class="number">366</span>             &#125;</span><br><span class="line"><span class="number">367</span></span><br><span class="line"><span class="number">368</span>             <span class="comment">// Nothing to do if there is no pending event.</span></span><br><span class="line"><span class="number">369</span>             <span class="keyword">if</span> (!mPendingEvent) &#123;</span><br><span class="line"><span class="number">370</span>                 <span class="keyword">return</span>;</span><br><span class="line"><span class="number">371</span>             &#125;</span><br><span class="line"><span class="number">372</span>         &#125; <span class="keyword">else</span> &#123;</span><br><span class="line"><span class="number">373</span>             <span class="comment">// Inbound queue has at least one entry.</span></span><br><span class="line"><span class="number">374</span>             mPendingEvent = mInboundQueue.dequeueAtHead();</span><br><span class="line"><span class="number">375</span>             traceInboundQueueLengthLocked();</span><br><span class="line"><span class="number">376</span>         &#125;</span><br><span class="line"><span class="number">377</span></span><br><span class="line"><span class="number">378</span>         <span class="comment">// Poke user activity for this event.</span></span><br><span class="line"><span class="number">379</span>         <span class="keyword">if</span> (mPendingEvent-&gt;policyFlags &amp; POLICY_FLAG_PASS_TO_USER) &#123;</span><br><span class="line"><span class="number">380</span>             pokeUserActivityLocked(mPendingEvent);</span><br><span class="line"><span class="number">381</span>         &#125;</span><br><span class="line"><span class="number">382</span></span><br><span class="line"><span class="number">383</span>         <span class="comment">// Get ready to dispatch the event.</span></span><br><span class="line"><span class="number">384</span>         resetANRTimeoutsLocked();</span><br><span class="line"><span class="number">385</span>     &#125;</span><br><span class="line"><span class="number">386</span></span><br><span class="line"><span class="number">387</span>     <span class="comment">// Now we have an event to dispatch.</span></span><br><span class="line"><span class="number">388</span>     <span class="comment">// All events are eventually dequeued and processed this way, even if we intend to drop them.</span></span><br><span class="line"><span class="number">389</span>     ALOG_ASSERT(mPendingEvent != <span class="literal">nullptr</span>);</span><br><span class="line"><span class="number">390</span>     <span class="keyword">bool</span> done = <span class="literal">false</span>;</span><br><span class="line"><span class="number">391</span>     DropReason dropReason = DROP_REASON_NOT_DROPPED;</span><br><span class="line"><span class="number">392</span>     <span class="keyword">if</span> (!(mPendingEvent-&gt;policyFlags &amp; POLICY_FLAG_PASS_TO_USER)) &#123;</span><br><span class="line"><span class="number">393</span>         dropReason = DROP_REASON_POLICY;</span><br><span class="line"><span class="number">394</span>     &#125; <span class="keyword">else</span> <span class="keyword">if</span> (!mDispatchEnabled) &#123;</span><br><span class="line"><span class="number">395</span>         dropReason = DROP_REASON_DISABLED;</span><br><span class="line"><span class="number">396</span>     &#125;</span><br><span class="line"><span class="number">397</span></span><br><span class="line"><span class="number">398</span>     <span class="keyword">if</span> (mNextUnblockedEvent == mPendingEvent) &#123;</span><br><span class="line"><span class="number">399</span>         mNextUnblockedEvent = <span class="literal">nullptr</span>;</span><br><span class="line"><span class="number">400</span>     &#125;</span><br><span class="line"><span class="number">401</span></span><br><span class="line"><span class="number">402</span>     <span class="keyword">switch</span> (mPendingEvent-&gt;type) &#123;</span><br><span class="line"><span class="number">403</span>     <span class="keyword">case</span> EventEntry::TYPE_CONFIGURATION_CHANGED: &#123;</span><br><span class="line"><span class="number">404</span>         ConfigurationChangedEntry* typedEntry =</span><br><span class="line"><span class="number">405</span>                 <span class="keyword">static_cast</span>&lt;ConfigurationChangedEntry*&gt;(mPendingEvent);</span><br><span class="line"><span class="number">406</span>         done = dispatchConfigurationChangedLocked(currentTime, typedEntry);</span><br><span class="line"><span class="number">407</span>         dropReason = DROP_REASON_NOT_DROPPED; <span class="comment">// configuration changes are never dropped</span></span><br><span class="line"><span class="number">408</span>         <span class="keyword">break</span>;</span><br><span class="line"><span class="number">409</span>     &#125;</span><br><span class="line"><span class="number">410</span></span><br><span class="line"><span class="number">411</span>     <span class="keyword">case</span> EventEntry::TYPE_DEVICE_RESET: &#123;</span><br><span class="line"><span class="number">412</span>         DeviceResetEntry* typedEntry =</span><br><span class="line"><span class="number">413</span>                 <span class="keyword">static_cast</span>&lt;DeviceResetEntry*&gt;(mPendingEvent);</span><br><span class="line"><span class="number">414</span>         done = dispatchDeviceResetLocked(currentTime, typedEntry);</span><br><span class="line"><span class="number">415</span>         dropReason = DROP_REASON_NOT_DROPPED; <span class="comment">// device resets are never dropped</span></span><br><span class="line"><span class="number">416</span>         <span class="keyword">break</span>;</span><br><span class="line"><span class="number">417</span>     &#125;</span><br><span class="line"><span class="number">418</span></span><br><span class="line"><span class="number">419</span>     <span class="keyword">case</span> EventEntry::TYPE_KEY: &#123;</span><br><span class="line"><span class="number">420</span>         KeyEntry* typedEntry = <span class="keyword">static_cast</span>&lt;KeyEntry*&gt;(mPendingEvent);</span><br><span class="line"><span class="number">421</span>         <span class="keyword">if</span> (isAppSwitchDue) &#123;</span><br><span class="line"><span class="number">422</span>             <span class="keyword">if</span> (isAppSwitchKeyEvent(typedEntry)) &#123;</span><br><span class="line"><span class="number">423</span>                 resetPendingAppSwitchLocked(<span class="literal">true</span>);</span><br><span class="line"><span class="number">424</span>                 isAppSwitchDue = <span class="literal">false</span>;</span><br><span class="line"><span class="number">425</span>             &#125; <span class="keyword">else</span> <span class="keyword">if</span> (dropReason == DROP_REASON_NOT_DROPPED) &#123;</span><br><span class="line"><span class="number">426</span>                 dropReason = DROP_REASON_APP_SWITCH;</span><br><span class="line"><span class="number">427</span>             &#125;</span><br><span class="line"><span class="number">428</span>         &#125;</span><br><span class="line"><span class="number">429</span>         <span class="keyword">if</span> (dropReason == DROP_REASON_NOT_DROPPED</span><br><span class="line"><span class="number">430</span>                 &amp;&amp; isStaleEvent(currentTime, typedEntry)) &#123;</span><br><span class="line"><span class="number">431</span>             dropReason = DROP_REASON_STALE;</span><br><span class="line"><span class="number">432</span>         &#125;</span><br><span class="line"><span class="number">433</span>         <span class="keyword">if</span> (dropReason == DROP_REASON_NOT_DROPPED &amp;&amp; mNextUnblockedEvent) &#123;</span><br><span class="line"><span class="number">434</span>             dropReason = DROP_REASON_BLOCKED;</span><br><span class="line"><span class="number">435</span>         &#125;</span><br><span class="line"><span class="number">436</span>         done = dispatchKeyLocked(currentTime, typedEntry, &amp;dropReason, nextWakeupTime);</span><br><span class="line"><span class="number">437</span>         <span class="keyword">break</span>;</span><br><span class="line"><span class="number">438</span>     &#125;</span><br><span class="line"><span class="number">439</span></span><br><span class="line"><span class="number">440</span>     <span class="keyword">case</span> EventEntry::TYPE_MOTION: &#123;</span><br><span class="line"><span class="number">441</span>         MotionEntry* typedEntry = <span class="keyword">static_cast</span>&lt;MotionEntry*&gt;(mPendingEvent);</span><br><span class="line"><span class="number">442</span>         <span class="keyword">if</span> (dropReason == DROP_REASON_NOT_DROPPED &amp;&amp; isAppSwitchDue) &#123;</span><br><span class="line"><span class="number">443</span>             dropReason = DROP_REASON_APP_SWITCH;</span><br><span class="line"><span class="number">444</span>         &#125;</span><br><span class="line"><span class="number">445</span>         <span class="keyword">if</span> (dropReason == DROP_REASON_NOT_DROPPED</span><br><span class="line"><span class="number">446</span>                 &amp;&amp; isStaleEvent(currentTime, typedEntry)) &#123;</span><br><span class="line"><span class="number">447</span>             dropReason = DROP_REASON_STALE;</span><br><span class="line"><span class="number">448</span>         &#125;</span><br><span class="line"><span class="number">449</span>         <span class="keyword">if</span> (dropReason == DROP_REASON_NOT_DROPPED &amp;&amp; mNextUnblockedEvent) &#123;</span><br><span class="line"><span class="number">450</span>             dropReason = DROP_REASON_BLOCKED;</span><br><span class="line"><span class="number">451</span>         &#125;</span><br><span class="line"><span class="number">452</span>         done = dispatchMotionLocked(currentTime, typedEntry,</span><br><span class="line"><span class="number">453</span>                 &amp;dropReason, nextWakeupTime);</span><br><span class="line"><span class="number">454</span>         <span class="keyword">break</span>;</span><br><span class="line"><span class="number">455</span>     &#125;</span><br><span class="line"><span class="number">456</span></span><br><span class="line"><span class="number">457</span>     <span class="keyword">default</span>:</span><br><span class="line"><span class="number">458</span>         ALOG_ASSERT(<span class="literal">false</span>);</span><br><span class="line"><span class="number">459</span>         <span class="keyword">break</span>;</span><br><span class="line"><span class="number">460</span>     &#125;</span><br><span class="line"><span class="number">461</span></span><br><span class="line"><span class="number">462</span>     <span class="keyword">if</span> (done) &#123;</span><br><span class="line"><span class="number">463</span>         <span class="keyword">if</span> (dropReason != DROP_REASON_NOT_DROPPED) &#123;</span><br><span class="line"><span class="number">464</span>             dropInboundEventLocked(mPendingEvent, dropReason);</span><br><span class="line"><span class="number">465</span>         &#125;</span><br><span class="line"><span class="number">466</span>         mLastDropReason = dropReason;</span><br><span class="line"><span class="number">467</span></span><br><span class="line"><span class="number">468</span>         releasePendingEventLocked();</span><br><span class="line"><span class="number">469</span>         *nextWakeupTime = LONG_LONG_MIN;  <span class="comment">// force next poll to wake up immediately</span></span><br><span class="line"><span class="number">470</span>     &#125;</span><br><span class="line"><span class="number">471</span> &#125;</span><br></pre></td></tr></table></figure>
+
+
+      
+      
+        <div class="page-reward">
+          <p><a href="javascript:void(0)" onclick="dashangToggle()" class="dashang">赏</a></p>
+          <div class="hide_box"></div>
+          <div class="shang_box">
+            <a class="shang_close" href="javascript:void(0)" onclick="dashangToggle()">×</a>
+            <div class="shang_tit">
+              <p>纯属好玩</p>
+            </div>
+            <div class="shang_payimg">
+              <img src="/img/alipayimg.jpg" alt="扫码支持" title="扫一扫" />
+            </div>
+              <div class="pay_explain">扫码打赏，你说多少就多少</div>
+            <div class="shang_payselect">
+              
+                <div class="pay_item checked" data-id="alipay">
+                  <span class="radiobox"></span>
+                  <span class="pay_logo"><img src="/img/alipay.png" alt="支付宝" /></span>
+                </div>
+              
+              
+                <div class="pay_item" data-id="wechat">
+                  <span class="radiobox"></span>
+                  <span class="pay_logo"><img src="/img/weixin.png" alt="微信" /></span>
+                </div>
+              
+            </div>
+            <div class="shang_info">
+              <p>打开<span id="shang_pay_txt">支付宝</span>扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+        </div>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/zepto/1.2.0/zepto.min.js"></script>
+        <script type="text/javascript">
+          $(".pay_item").click(function(){
+            $(this).addClass('checked').siblings('.pay_item').removeClass('checked');
+            var dataid=$(this).attr('data-id');
+            $(".shang_payimg img").attr("src","/img/"+dataid+"img.jpg");
+            $("#shang_pay_txt").text(dataid=="alipay"?"支付宝":"微信");
+          });
+          function dashangToggle(){
+            
+            $(".hide_box").fadeToggle();
+            $(".shang_box").fadeToggle();
+          }
+        </script>
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/chongyuzhao.github.io/2020/07/11/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%B8%89)%E4%B9%8BInputDispatcher/">Android-Input子系统专题-InputFlinger(三)之InputDispatcher</a></p>
+        <p><span>文章作者:</span><a href="/chongyuzhao.github.io/" title="访问 chongyuzhao 的个人博客">chongyuzhao</a></p>
+        <p><span>发布时间:</span>2020年07月11日 - 21时51分</p>
+        <p><span>最后更新:</span>2020年10月08日 - 11时17分</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/chongyuzhao.github.io/2020/07/11/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%B8%89)%E4%B9%8BInputDispatcher/" title="Android-Input子系统专题-InputFlinger(三)之InputDispatcher">https://chongyuzhao.github.io/2020/07/11/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%B8%89)%E4%B9%8BInputDispatcher/</a>
+            <span class="copy-path" data-clipboard-text="原文: https://chongyuzhao.github.io/2020/07/11/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%B8%89)%E4%B9%8BInputDispatcher/　　作者: chongyuzhao" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script src="/chongyuzhao.github.io/js/clipboard.min.js"></script>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" title="中国大陆 (CC BY-NC-SA 3.0 CN)" target = "_blank">"署名-非商用-相同方式共享 3.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+<nav id="article-nav">
+  
+    <a href="/chongyuzhao.github.io/2020/12/05/display/display-layerstack/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption"><</strong>
+      <div class="article-nav-title">
+        
+          display-layerstack
+        
+      </div>
+    </a>
+  
+  
+    <a href="/chongyuzhao.github.io/2020/03/26/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%BA%8C)%E4%B9%8BInputReader/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Android-Input子系统专题-InputFlinger(二)之InputReader</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#InputDispatcher的运行"><span class="toc-number">1.</span> <span class="toc-text">InputDispatcher的运行</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#command的enqueue和run"><span class="toc-number">1.1.</span> <span class="toc-text">command的enqueue和run</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Event的接收与分发"><span class="toc-number">1.2.</span> <span class="toc-text">Event的接收与分发</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Event的接收"><span class="toc-number">1.2.1.</span> <span class="toc-text">Event的接收</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#InputDispatcher线程的wake"><span class="toc-number">1.2.1.1.</span> <span class="toc-text">InputDispatcher线程的wake</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Event的分发"><span class="toc-number">1.2.2.</span> <span class="toc-text">Event的分发</span></a></li></ol></li></ol></li></ol>
+</div>
+<input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+
+<script src="https://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+
+<script>
+    var valueHide = "隐藏目录";
+    var valueShow = "显示目录";
+
+    if ($(".left-col").is(":hidden")) {
+        $("#tocButton").attr("value", valueShow);
+    }
+    $("#tocButton").click(function() {
+        if ($("#toc").is(":hidden")) {
+            $("#tocButton").attr("value", valueHide);
+            $("#toc").slideDown(320);
+        }
+        else {
+            $("#tocButton").attr("value", valueShow);
+            $("#toc").slideUp(350);
+        }
+    })
+    if ($(".toc").length < 1) {
+        $("#toc, #tocButton").hide();
+    }
+</script>
+
+
+
+
+
+<div class="bdsharebuttonbox">
+	<a href="#" class="fx fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+	<a href="#" class="fx fa-weixin bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+	<a href="#" class="fx fa-qq bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+	<a href="#" class="fx fa-facebook-official bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+	<a href="#" class="fx fa-twitter bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+	<a href="#" class="fx fa-linkedin bds_linkedin" data-cmd="linkedin" title="分享到linkedin"></a>
+	<a href="#" class="fx fa-files-o bds_copy" data-cmd="copy" title="分享到复制网址"></a>
+</div>
+<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"2","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/chongyuzhao.github.io/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+
+
+
+
+    
+        <div id="gitments"></div>
+<script src="/chongyuzhao.github.io/js/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+      id: window.location.pathname,
+      owner: 'zcy',
+      repo: 'chongyuzhao.github.io',
+      oauth: {
+        client_id: '',
+        client_secret: '',
+      },
+    })
+    gitment.render('gitments')
+</script>
+    
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/chongyuzhao.github.io/2020/12/05/display/display-layerstack/" title="上一篇: display-layerstack">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+        
+            <a href="/chongyuzhao.github.io/2020/03/26/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%BA%8C)%E4%B9%8BInputReader/" title="下一篇: Android-Input子系统专题-InputFlinger(二)之InputReader">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/chongyuzhao.github.io/2020/12/05/display/display-layerstack/">display-layerstack</a></li><li class="post-list-item"><a class="post-list-link" href="/chongyuzhao.github.io/2020/07/11/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%B8%89)%E4%B9%8BInputDispatcher/">Android-Input子系统专题-InputFlinger(三)之InputDispatcher</a></li><li class="post-list-item"><a class="post-list-link" href="/chongyuzhao.github.io/2020/03/26/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%BA%8C)%E4%B9%8BInputReader/">Android-Input子系统专题-InputFlinger(二)之InputReader</a></li><li class="post-list-item"><a class="post-list-link" href="/chongyuzhao.github.io/2020/03/22/Android%E5%A4%9A%E5%B1%8F%E5%B9%95%E4%B8%93%E9%A2%98-%E5%8F%8CHome%E7%9A%84%E5%90%AF%E5%8A%A8/">Android多屏幕专题--双Home的启动</a></li><li class="post-list-item"><a class="post-list-link" href="/chongyuzhao.github.io/2020/03/21/Android%E5%A4%9A%E5%B1%8F%E5%B9%95%E4%B8%93%E9%A2%98-%E5%BC%80%E7%AF%87/">Android多屏幕专题--开篇</a></li><li class="post-list-item"><a class="post-list-link" href="/chongyuzhao.github.io/2020/03/20/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-%E8%BE%93%E5%85%A5%E8%B7%AF%E7%94%B1/">Android Input子系统专题-输入路由</a></li><li class="post-list-item"><a class="post-list-link" href="/chongyuzhao.github.io/2020/03/15/input/Android-Input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-InputFlinger(%E4%B8%80)/">Android Input子系统专题-InputFlinger(一)</a></li><li class="post-list-item"><a class="post-list-link" href="/chongyuzhao.github.io/2020/03/15/input/Android-input%E5%AD%90%E7%B3%BB%E7%BB%9F%E4%B8%93%E9%A2%98-%E5%BC%80%E7%AF%87/">Android input子系统专题--开篇</a></li></ul>
+    <script src="https://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+    <script>
+        $(".post-list").addClass("toc-article");
+        $(".post-list-item a").attr("target","_blank");
+        $("#post-nav-button > a:nth-child(2)").click(function() {
+            $(".fa-bars, .fa-times").toggle();
+            $(".post-list").toggle(300);
+            if ($(".toc").length > 0) {
+                $("#toc, #tocButton").toggle(200, function() {
+                    if ($(".switch-area").is(":visible")) {
+                        $("#tocButton").attr("value", valueHide);
+                        }
+                    })
+            }
+            else {
+            }
+        })
+    </script>
+
+
+
+    <script>
+        
+    </script>
+
+
+<script>
+    function createImgEventFullScreen() {
+        var imgs = $(".article").find("img");
+        console.log(imgs);
+        for (var i = 0; i < imgs.length; i++) {
+            // $(imgs[i]).click(createCover(imgs[i]));
+            imgs[i].onclick = function (e) {
+                var src = e.srcElement.currentSrc;
+                var _this = $(this);
+                console.log(_this);
+                createCover(src,_this);
+            }
+        }
+        function createCover(src,_this) {
+            console.log(_this);
+            console.log(src);
+            var cover = $("<div id='outerDiv'  style='position:fixed;top:0;left:0;background:rgba(0,0,0,0.7);z-index:5;width:100%;height:100%;display:none;'><div id='innerDiv' style='position:absolute;'><img  id='bigImg' style='border:5px solid #fff;' src=''/></div></div>");
+            $("#outerDiv").remove();
+            $("body").append(cover);
+            imgShow("#outerDiv", "#innerDiv", "#bigImg", _this,src);
+
+        }
+    }
+    function imgShow(outerDiv, innerDiv, bigImg, _this,src) {
+        //var src = _this.attr("src"); //获取当前点击的common-img元素中的src属性
+        $(bigImg).attr("src", src); //设置#bigImg元素的src属性
+
+        /*获取当前点击图片的真实大小，并显示弹出层及大图*/
+        $("<img/>").attr("src", src).load(function () {
+            var windowW = $(window).width(); //获取当前窗口宽度
+            var windowH = $(window).height(); //获取当前窗口高度
+            var realWidth = this.width; //获取图片真实宽度
+            var realHeight = this.height; //获取图片真实高度
+            var imgWidth, imgHeight;
+            var scale = 1.2; //缩放尺寸，当图片真实宽度和高度大于窗口宽度和高度时进行缩放
+
+            if (realHeight > windowH * scale) { //判断图片高度
+                imgHeight = windowH * scale; //如大于窗口高度，图片高度进行缩放
+                imgWidth = imgHeight / realHeight * realWidth; //等比例缩放宽度
+                if (imgWidth > windowW * scale) { //如宽度仍大于窗口宽度
+                    imgWidth = windowW * scale; //再对宽度进行缩放
+                }
+            } else if (realWidth > windowW * scale) { //如图片高度合适，判断图片宽度
+                imgWidth = windowW * scale; //如大于窗口宽度，图片宽度进行缩放
+                imgHeight = imgWidth / realWidth * realHeight; //等比例缩放高度
+            } else { //如果图片真实高度和宽度都符合要求，高宽不变
+                imgWidth = realWidth;
+                imgHeight = realHeight;
+            }
+            $(bigImg).css("width", imgWidth); //以最终的宽度对图片缩放
+
+            var w = (windowW - imgWidth) / 2; //计算图片与窗口左边距
+            var h = (windowH - imgHeight) / 2; //计算图片与窗口上边距
+            $(innerDiv).css({ "top": h, "left": w }); //设置#innerDiv的top和left属性
+            //console.log('****')
+            $(outerDiv).fadeIn("fast"); //淡入显示#outerDiv
+        });
+
+        $(outerDiv).click(function () { //再次点击淡出消失弹出层
+            $(this).fadeOut("fast");
+        });
+    }
+    setTimeout(function () {
+        createImgEventFullScreen();
+    }, 1000)
+</script>
+
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                &copy; 2020 chongyuzhao
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/luuman/hexo-theme-spfk" target="_blank">spfk</a> by luuman
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" >海贼到访数: 
+                            <span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>, </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit">本页阅读量: 
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+
+    </div>
+    
+<script src="https://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+
+
+<script src="/chongyuzhao.github.io/js/main.js"></script>
+
+
+    <script>
+        $(document).ready(function() {
+            var backgroundnum = 24;
+            var backgroundimg = "url(/chongyuzhao.github.io/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+            $("#mobile-nav").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+            $(".left-col").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+        })
+    </script>
+
+
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    $(document).ready(function() {
+        if ($("#comments").length < 1) {
+            $("#scroll > a:nth-child(2)").hide();
+        };
+    })
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+  <script language="javascript">
+    $(function() {
+        $("a[title]").each(function() {
+            var a = $(this);
+            var title = a.attr('title');
+            if (title == undefined || title == "") return;
+            a.data('title', title).removeAttr('title').hover(
+
+            function() {
+                var offset = a.offset();
+                $("<div id=\"anchortitlecontainer\"></div>").appendTo($("body")).html(title).css({
+                    top: offset.top - a.outerHeight() - 15,
+                    left: offset.left + a.outerWidth()/2 + 1
+                }).fadeIn(function() {
+                    var pop = $(this);
+                    setTimeout(function() {
+                        pop.remove();
+                    }, pop.text().length * 800);
+                });
+            }, function() {
+                $("#anchortitlecontainer").remove();
+            });
+        });
+    });
+</script>
+
+
+    <script type="text/javascript">
+      window.onload = function(){
+        document.getElementById("search").onclick = function(){
+            console.log("search")
+            search();
+        }
+      }
+      function search(){
+        (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+        (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+        e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+        })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+        _st('install','A1Pz-LKMXbrzcFg2FWi6','2.0.0');
+      }
+    </script>
+
+
+  <script src='https://unpkg.com/mermaid@7.1.2/dist/mermaid.min.js'></script>
+  <script>
+    if (window.mermaid) {
+      mermaid.initialize({theme: 'forest'});
+    }
+  </script>
+
+
+  </div>
+</body>
+</html>
